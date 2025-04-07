@@ -3,11 +3,10 @@ import { firebaseAuth } from '#start/firebase'
 
 export default class AuthController {
   public async setToken({ request, response }: HttpContext) {
-    const idToken = request.input('token')
     try {
+      const idToken = request.input('token')
       const decodedToken = await firebaseAuth.verifyIdToken(idToken)
       const uid = decodedToken.uid
-
       response.cookie('session', idToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',

@@ -8,7 +8,9 @@
 */
 
 import router from '@adonisjs/core/services/router'
+import { middleware } from '#start/kernel'
 const AuthController = () => import('#controllers/auth_controller')
+const VoteController = () => import('#controllers/vote_controller')
 
 router
   .group(() => {
@@ -17,5 +19,12 @@ router
         router.post('/set-token', [AuthController, 'setToken'])
       })
       .prefix('/auth')
+
+    router
+      .group(() => {
+        router.post('/', [VoteController, 'process'])
+      })
+      .use([middleware.firebaseAuth()])
+      .prefix('/vote')
   })
   .prefix('/api')

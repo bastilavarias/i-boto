@@ -1,97 +1,100 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import Image from 'next/image'
+import { Button } from '@/components/ui/button'
 import {
     Card,
     CardContent,
     CardFooter,
     CardHeader,
     CardTitle,
-} from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, CheckCircle2, Search } from 'lucide-react';
-import { candidates } from '@/data';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Input } from '@/components/ui/input';
+} from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { AlertCircle, CheckCircle2, Search } from 'lucide-react'
+import { candidates } from '@/data'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Input } from '@/components/ui/input'
+import { useVoteStore } from '@/stores/useVoteStore'
 
 interface BallotProps {
-    isPublic?: boolean;
+    isPublic?: boolean
 }
 
 export function Ballot({ isPublic = false }: BallotProps) {
-    const router = useRouter();
-    const [selectedCandidates, setSelectedCandidates] = useState<number[]>([]);
-    const [showWarning, setShowWarning] = useState(false);
-    const [hasVoted, setHasVoted] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const router = useRouter()
+    const [selectedCandidates, setSelectedCandidates] = useState<number[]>([])
+    const [showWarning, setShowWarning] = useState(false)
+    const [hasVoted, setHasVoted] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
-    const MAX_SELECTIONS = 12;
+    const { vote } = useVoteStore()
+
+    const MAX_SELECTIONS = 12
 
     useEffect(() => {
-        const storedVotes = localStorage.getItem('mockElectionVotes');
+        const storedVotes = localStorage.getItem('mockElectionVotes')
         if (storedVotes) {
-            setSelectedCandidates(JSON.parse(storedVotes));
-            setHasVoted(true);
+            setSelectedCandidates(JSON.parse(storedVotes))
+            setHasVoted(true)
         }
-    }, []);
+    }, [])
 
     const handleCandidateSelect = (candidateId: number) => {
-        if (hasVoted) return;
+        if (hasVoted) return
 
         setSelectedCandidates((prev) => {
             if (prev.includes(candidateId)) {
-                return prev.filter((id) => id !== candidateId);
+                return prev.filter((id) => id !== candidateId)
             }
 
             if (prev.length < MAX_SELECTIONS) {
-                return [...prev, candidateId];
+                return [...prev, candidateId]
             }
 
-            setShowWarning(true);
-            return prev;
-        });
-    };
+            setShowWarning(true)
+            return prev
+        })
+    }
 
     useEffect(() => {
         if (showWarning) {
             const timer = setTimeout(() => {
-                setShowWarning(false);
-            }, 3000);
+                setShowWarning(false)
+            }, 3000)
 
-            return () => clearTimeout(timer);
+            return () => clearTimeout(timer)
         }
-    }, [showWarning]);
+    }, [showWarning])
 
     const handleSubmit = () => {
-        if (hasVoted || selectedCandidates.length === 0) return;
+        if (hasVoted || selectedCandidates.length === 0) return
 
-        setIsSubmitting(true);
+        setIsSubmitting(true)
 
         localStorage.setItem(
             'mockElectionVotes',
             JSON.stringify(selectedCandidates)
-        );
+        )
 
-        const existingResults = localStorage.getItem('mockElectionResults');
-        const results = existingResults ? JSON.parse(existingResults) : {};
+        const existingResults = localStorage.getItem('mockElectionResults')
+        const results = existingResults ? JSON.parse(existingResults) : {}
 
         selectedCandidates.forEach((id) => {
-            results[id] = (results[id] || 0) + 1;
-        });
+            results[id] = (results[id] || 0) + 1
+        })
 
-        results.lastUpdated = new Date().toISOString();
+        results.lastUpdated = new Date().toISOString()
 
-        localStorage.setItem('mockElectionResults', JSON.stringify(results));
+        localStorage.setItem('mockElectionResults', JSON.stringify(results))
 
         setTimeout(() => {
-            setHasVoted(true);
-            setIsSubmitting(false);
-        }, 1500);
-    };
+            setHasVoted(true)
+            setIsSubmitting(false)
+        }, 1500)
+    }
 
     if (hasVoted) {
         return (
@@ -111,7 +114,7 @@ export function Ballot({ isPublic = false }: BallotProps) {
                             {selectedCandidates.map((id) => {
                                 const candidate = candidates.find(
                                     (c) => c.id === id
-                                );
+                                )
                                 return (
                                     <div
                                         key={id}
@@ -134,7 +137,7 @@ export function Ballot({ isPublic = false }: BallotProps) {
                                             </p>
                                         </div>
                                     </div>
-                                );
+                                )
                             })}
                         </div>
                         <div className="flex flex-col sm:flex-row justify-center gap-4">
@@ -165,7 +168,7 @@ export function Ballot({ isPublic = false }: BallotProps) {
                     </CardContent>
                 </Card>
             </div>
-        );
+        )
     }
 
     return (
@@ -302,7 +305,7 @@ export function Ballot({ isPublic = false }: BallotProps) {
                         <div className="flex justify-center">
                             <Button
                                 size="lg"
-                                onClick={handleSubmit}
+                                onClick={vote}
                                 disabled={
                                     selectedCandidates.length === 0 ||
                                     isSubmitting
@@ -320,8 +323,18 @@ export function Ballot({ isPublic = false }: BallotProps) {
                             </Button>
                         </div>
                     )}
+                    <Button size="lg" onClick={vote} className="px-8">
+                        {isSubmitting ? (
+                            <>
+                                <div className="border-2 border-white border-t-transparent rounded-full w-5 h-5 animate-spin mr-2"></div>
+                                Submitting...
+                            </>
+                        ) : (
+                            'Submit Ballot'
+                        )}
+                    </Button>
                 </CardFooter>
             </Card>
         </div>
-    );
+    )
 }
