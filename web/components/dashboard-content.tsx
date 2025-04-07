@@ -12,8 +12,11 @@ import {
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Vote, BarChart3, Users } from 'lucide-react'
+import { useAuth } from '@/hooks/useAuth'
 
 export function DashboardContent() {
+    const { user } = useAuth()
+
     const [hasVoted, setHasVoted] = useState(false)
     const [totalVotes, setTotalVotes] = useState(0)
     const [voterParticipation, setVoterParticipation] = useState(0)
@@ -42,9 +45,7 @@ export function DashboardContent() {
         <div className="space-y-6">
             <div>
                 <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-                <p className="text-gray-500">
-                    Welcome to the iBoto Senatorial 2025 Election
-                </p>
+                <p className="text-gray-500">Welcome {user?.displayName},</p>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

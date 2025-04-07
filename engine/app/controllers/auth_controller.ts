@@ -2,7 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { firebaseAuth } from '#start/firebase'
 
 export default class AuthController {
-  public async login({ request, response }: HttpContext) {
+  public async setToken({ request, response }: HttpContext) {
     const idToken = request.input('token')
     try {
       const decodedToken = await firebaseAuth.verifyIdToken(idToken)

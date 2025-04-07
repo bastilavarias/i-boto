@@ -1,48 +1,67 @@
-'use client';
+'use client'
 
-import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { BarChart3, LogIn, Menu, LayoutDashboard } from 'lucide-react';
-import { usePathname } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
-import { useAuthStore } from '@/stores/useAuthStore';
+import React, { useEffect, useState } from 'react'
+import Link from 'next/link'
+import {
+    BarChart3,
+    LogIn,
+    Menu,
+    LayoutDashboard,
+    LogOut,
+    Vote,
+} from 'lucide-react'
+import { usePathname, useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet'
+import { useAuth } from '@/hooks/useAuth'
+import { useAuthStore } from '@/stores/useAuthStore'
 
 interface MainLayoutProps {
-    children: React.ReactNode;
+    children: React.ReactNode
 }
 
-export function MainLayout({ children }: MainLayoutProps) {
-    const pathname = usePathname();
-    const { user } = useAuthStore();
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+const defaultNavs = [
+    {
+        name: 'Results',
+        href: '/results',
+        icon: BarChart3,
+    },
+]
+const publicNavs = [
+    {
+        name: 'Login',
+        href: '/login',
+        icon: LogIn,
+    },
+]
+const privateNavs = [
+    {
+        name: 'Dashboard',
+        href: '/dashboard',
+        icon: LayoutDashboard,
+    },
+]
 
-    let navigations = [
-        {
-            name: 'Results',
-            href: '/results',
-            icon: BarChart3,
-        },
-        {
-            name: 'Login',
-            href: '/login',
-            icon: LogIn,
-        },
-    ];
+export function MainLayout({ children }: MainLayoutProps) {
+    const pathname = usePathname()
+    const router = useRouter()
+
+    const { user } = useAuth()
+    const { setToken, isAuthenticated } = useAuthStore()
+
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+    const [navs, setNavs] = useState([...defaultNavs])
 
     useEffect(() => {
         if (user) {
-            navigations = [
-                {
-                    name: 'Dashboard',
-                    href: '/dashboard',
-                    icon: LayoutDashboard,
-                },
-            ];
-            setIsAuthenticated(true);
+            setToken(user)
+            if (isAuthenticated) {
+                setNavs([...privateNavs, ...defaultNavs])
+            } else {
+                setNavs([...defaultNavs, ...publicNavs])
+            }
         }
-    }, [user]);
+    }, [user])
 
     return (
         <div className="min-h-screen flex flex-col bg-gray-50">
@@ -54,8 +73,8 @@ export function MainLayout({ children }: MainLayoutProps) {
                         </div>
 
                         <nav className="hidden md:flex items-center space-x-4">
-                            {navigations.map((navigation) => {
-                                const isActive = pathname === navigation.href;
+                            {navs.map((navigation) => {
+                                const isActive = pathname === navigation.href
                                 return (
                                     <Link
                                         href={navigation.href}
@@ -71,8 +90,14 @@ export function MainLayout({ children }: MainLayoutProps) {
                                         />
                                         {navigation.name}
                                     </Link>
-                                );
+                                )
                             })}
+                            {isAuthenticated && (
+                                <Button>
+                                    <Vote />
+                                    Vote Now
+                                </Button>
+                            )}
                         </nav>
 
                         <div className="flex items-center md:hidden">
@@ -98,50 +123,41 @@ export function MainLayout({ children }: MainLayoutProps) {
                                         </div>
                                         <nav className="flex-1 pt-5 pb-4 overflow-y-auto">
                                             <div className="px-2 space-y-1">
-                                                {navigations.map(
-                                                    (navigation) => {
-                                                        const isActive =
-                                                            pathname ===
-                                                            navigation.href;
-                                                        return (
-                                                            <Link
-                                                                key={
-                                                                    navigation.name
-                                                                }
-                                                                href={
-                                                                    navigation.href
-                                                                }
-                                                                className={`group flex items-center px-2 py-2 text-base font-medium rounded-md ${
+                                                {navs.map((navigation) => {
+                                                    const isActive =
+                                                        pathname ===
+                                                        navigation.href
+                                                    return (
+                                                        <Link
+                                                            key={
+                                                                navigation.name
+                                                            }
+                                                            href={
+                                                                navigation.href
+                                                            }
+                                                            className={`group flex items-center px-2 py-2 text-base font-medium rounded-md ${
+                                                                isActive
+                                                                    ? 'bg-gray-100 text-gray-900'
+                                                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                                            }`}
+                                                            onClick={() =>
+                                                                setIsMobileMenuOpen(
+                                                                    false
+                                                                )
+                                                            }
+                                                        >
+                                                            <navigation.icon
+                                                                className={`mr-4 flex-shrink-0 h-6 w-6 ${
                                                                     isActive
-                                                                        ? 'bg-gray-100 text-gray-900'
-                                                                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                                                        ? 'text-gray-500'
+                                                                        : 'text-gray-400 group-hover:text-gray-500'
                                                                 }`}
-                                                                onClick={() =>
-                                                                    setIsMobileMenuOpen(
-                                                                        false
-                                                                    )
-                                                                }
-                                                            >
-                                                                <navigation.icon
-                                                                    className={`mr-4 flex-shrink-0 h-6 w-6 ${
-                                                                        isActive
-                                                                            ? 'text-gray-500'
-                                                                            : 'text-gray-400 group-hover:text-gray-500'
-                                                                    }`}
-                                                                    aria-hidden="true"
-                                                                />
-                                                                {
-                                                                    navigation.name
-                                                                }
-                                                            </Link>
-                                                        );
-                                                    }
-                                                )}
-                                                {isAuthenticated && (
-                                                    <span>
-                                                        {user?.displayName}
-                                                    </span>
-                                                )}
+                                                                aria-hidden="true"
+                                                            />
+                                                            {navigation.name}
+                                                        </Link>
+                                                    )
+                                                })}
                                             </div>
                                         </nav>
                                     </div>
@@ -172,7 +188,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                 </div>
             </footer>
         </div>
-    );
+    )
 }
 
 function LogoLink() {
@@ -180,5 +196,5 @@ function LogoLink() {
         <Link href="/" className="flex items-center gap-2">
             <span className="text-xl font-bold">iBoto 2025 🇵🇭</span>
         </Link>
-    );
+    )
 }

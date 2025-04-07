@@ -14,7 +14,7 @@ router
   .group(() => {
     router
       .group(() => {
-        router.post('/set-token', [AuthController, 'login'])
+        router.post('/set-token', [AuthController, 'setToken'])
       })
       .prefix('/auth')
   })

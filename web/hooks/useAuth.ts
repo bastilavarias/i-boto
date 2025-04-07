@@ -1,4 +1,3 @@
-// hooks/useAuth.ts
 import { useEffect, useState } from 'react'
 import {
     onAuthStateChanged,
@@ -6,6 +5,8 @@ import {
     GoogleAuthProvider,
     signOut,
     User,
+    browserLocalPersistence,
+    setPersistence,
 } from 'firebase/auth'
 import { auth } from '../lib/firebase'
 
@@ -28,7 +29,12 @@ export function useAuth(): UseAuthReturn {
     }, [])
 
     const login = async () => {
-        await signInWithPopup(auth, provider)
+        try {
+            await setPersistence(auth, browserLocalPersistence)
+            await signInWithPopup(auth, provider)
+        } catch (err) {
+            console.error('Login error:', err)
+        }
     }
 
     const logout = async () => {

@@ -18,7 +18,7 @@ import { useAuthStore } from '@/stores/useAuthStore'
 
 export function LoginContent() {
     const { user, login } = useAuth()
-    const { setUser } = useAuthStore()
+    const { setToken } = useAuthStore()
     const router = useRouter()
     const [isLoading, setIsLoading] = useState(false)
     const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -36,17 +36,7 @@ export function LoginContent() {
         try {
             await login()
             if (user) {
-                setUser(user)
-                const authUser = await fetch(
-                    'http://localhost:3333/api/auth/set-token',
-                    {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ token: user.accessToken }),
-                        credentials: 'include',
-                    }
-                )
-                console.log(authUser)
+                setToken(user)
                 router.push('/dashboard')
                 setIsLoading(false)
             }
