@@ -1,7 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { createVerify } from 'node:crypto'
 
-export default class VotesController {
+export default class VoteController {
   public async process({ request, response }: HttpContext) {
     try {
       let { vote, sig, pubKey } = request.only(['vote', 'sig', 'pubKey'])
