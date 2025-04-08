@@ -17,7 +17,7 @@ export const useVoteStore = create<VoteState>((set) => ({
             ['sign', 'verify']
         )
         const votePayload = {
-            candidates: [1, 3, 5],
+            candidates: ['c1', 'c2', 'c3'],
             timestamp: Date.now(),
             email: 'sebastiancurtislavarias@gmail.com',
         }
@@ -38,12 +38,6 @@ export const useVoteStore = create<VoteState>((set) => ({
         const pubKeyBase64 = btoa(
             String.fromCharCode(...new Uint8Array(exportedPubKey))
         )
-
-        console.log({
-            vote: votePayload,
-            sig,
-            pubKey: pubKeyBase64,
-        })
 
         await fetch('http://localhost:3333/api/vote/', {
             method: 'POST',

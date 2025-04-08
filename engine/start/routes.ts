@@ -22,7 +22,7 @@ router
 
     router
       .group(() => {
-        router.post('/', [VoteController, 'process'])
+        router.post('/', [VoteController, 'create'])
       })
       .use([middleware.firebaseAuth()])
       .prefix('/vote')
