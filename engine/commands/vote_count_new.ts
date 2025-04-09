@@ -6,7 +6,9 @@ export default class VoteBatchCount extends BaseCommand {
   static commandName = 'vote:batch-count'
   static description = 'Count batched votes.'
 
-  static options: CommandOptions = {}
+  static options: CommandOptions = {
+    startApp: true,
+  }
 
   async run() {
     try {
