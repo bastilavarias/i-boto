@@ -1,47 +1,40 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { BarChart, Search, Clock, Clock4 } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useState, useEffect } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Input } from '@/components/ui/input'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { BarChart, Search, Clock, Clock4 } from 'lucide-react'
+import { format, parseISO } from 'date-fns'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 interface Candidate {
-    id: number;
-    name: string;
-    party: string;
-    votes: number;
+    id: number
+    name: string
+    party: string
+    votes: number
 }
 
 export function ResultContent() {
-    const [candidates, setCandidates] = useState<Candidate[]>([]);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [loading, setLoading] = useState(true);
-    const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+    const [candidates, setCandidates] = useState<Candidate[]>([])
+    const [searchTerm, setSearchTerm] = useState('')
+    const [loading, setLoading] = useState(true)
+    const [lastUpdated, setLastUpdated] = useState<string | null>(null)
 
     useEffect(() => {
         // Load results data
         const loadResults = () => {
-            setLoading(true);
+            setLoading(true)
 
             // Get stored results
-            const storedResults = localStorage.getItem('mockElectionResults');
-            const votesData = storedResults ? JSON.parse(storedResults) : {};
+            const storedResults = localStorage.getItem('mockElectionResults')
+            const votesData = storedResults ? JSON.parse(storedResults) : {}
 
             // Extract last updated timestamp
             if (votesData.lastUpdated) {
-                setLastUpdated(votesData.lastUpdated);
-                delete votesData.lastUpdated;
+                setLastUpdated(votesData.lastUpdated)
+                delete votesData.lastUpdated
             }
 
             // Create candidate list with votes
@@ -182,46 +175,44 @@ export function ResultContent() {
                 },
                 { id: 65, name: 'VERCELES, LEANDRO', party: 'IND', votes: 0 },
                 { id: 66, name: 'VILLAR, CAMILLE', party: 'NP', votes: 0 },
-            ];
+            ]
 
             // Update votes from stored data
             candidateList.forEach((candidate) => {
                 if (votesData[candidate.id]) {
-                    candidate.votes = votesData[candidate.id];
+                    candidate.votes = votesData[candidate.id]
                 } else {
                     // Add some random votes for demonstration
-                    candidate.votes = Math.floor(Math.random() * 1000);
+                    candidate.votes = Math.floor(Math.random() * 1000)
                 }
-            });
+            })
 
-            setCandidates(candidateList);
-            setLoading(false);
-        };
+            setCandidates(candidateList)
+            setLoading(false)
+        }
 
-        loadResults();
-    }, []);
+        loadResults()
+    }, [])
 
     const filteredCandidates = candidates.filter(
         (candidate) =>
             candidate.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             candidate.party.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    )
 
     const sortedByVotes = [...filteredCandidates].sort(
         (a, b) => b.votes - a.votes
-    );
+    )
     const sortedByName = [...filteredCandidates].sort((a, b) =>
         a.name.localeCompare(b.name)
-    );
-    const sortedById = [...filteredCandidates].sort((a, b) => a.id - b.id);
+    )
+    const sortedById = [...filteredCandidates].sort((a, b) => a.id - b.id)
 
     // Get top 12 candidates
-    const top12 = [...candidates]
-        .sort((a, b) => b.votes - a.votes)
-        .slice(0, 12);
+    const top12 = [...candidates].sort((a, b) => b.votes - a.votes).slice(0, 12)
 
     // Calculate max votes for bar width
-    const maxVotes = Math.max(...candidates.map((c) => c.votes));
+    const maxVotes = Math.max(...candidates.map((c) => c.votes))
 
     const content = (
         <div className="space-y-6">
@@ -338,12 +329,6 @@ export function ResultContent() {
                                 <TabsList className="h-12">
                                     <TabsTrigger value="votes">
                                         Sort by Votes
-                                    </TabsTrigger>
-                                    <TabsTrigger value="name">
-                                        Sort by Name
-                                    </TabsTrigger>
-                                    <TabsTrigger value="number">
-                                        Sort by Number
                                     </TabsTrigger>
                                 </TabsList>
                             </div>
@@ -512,7 +497,7 @@ export function ResultContent() {
                 </CardContent>
             </Card>
         </div>
-    );
+    )
 
-    return content;
+    return content
 }

@@ -8,6 +8,8 @@ import SignatureService from '#services/signature_service'
 import UserHistory from '#models/user_history'
 import HashingService from '#services/hashing_service'
 import VoteRecord from '#models/vote_record'
+import VoteTally from '#models/vote_tally'
+import env from '#start/env'
 
 export default class VoteController {
   private encryptionService: EncryptionService
@@ -92,6 +94,7 @@ export default class VoteController {
       if (validRawVotes.length === 0) {
         throw new Error('No valid votes.')
       }
+      // @ts-ignore
       const votes = validRawVotes.map(({ vote }) => vote.candidates).flat()
       const leaves = votes.map((vote) => keccak256(Buffer.from(vote)))
       const tree = new MerkleTree(leaves, keccak256, { sortPairs: true })
@@ -161,9 +164,24 @@ export default class VoteController {
         },
         {} as Record<string, number>
       )
-      console.log(clusteredVotes)
+      const formattedVotes = Object.entries(clusteredVotes).map(([candidate, vote]) => ({
+        candidate,
+        vote,
+      }))
       voteRecord.counted = true
+      if (formattedVotes.length === 0) {
+        return
+      }
+      for (const { candidate, vote } of formattedVotes) {
+        await VoteTally.create({
+          candidate,
+          vote,
+          batch: voteRecord.id,
+          signature: this.signatureService.sign(env.get('VOTE_TALLY_SIGNATURE_DATA')),
+        })
+      }
 
+      voteRecord.tallied = true
       await voteRecord.save()
     } catch (error) {
       return error.message

@@ -4,7 +4,7 @@ type VoteState = {
     vote: () => void
 }
 
-export const useVoteStore = create<VoteState>((set) => ({
+export const useVoteStore = create<VoteState>(() => ({
     vote: async () => {
         const keyPair = await window.crypto.subtle.generateKey(
             {
@@ -17,7 +17,7 @@ export const useVoteStore = create<VoteState>((set) => ({
             ['sign', 'verify']
         )
         const votePayload = {
-            candidates: ['c1', 'c2', 'c3'],
+            candidates: ['AQUINOBAM2025'],
             timestamp: Date.now(),
             email: 'sebastiancurtislavarias@gmail.com',
         }

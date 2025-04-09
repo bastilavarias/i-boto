@@ -57,4 +57,11 @@ export default await Env.create(new URL('../', import.meta.url), {
   */
   PRIVATE_KEY: Env.schema.string(),
   PUBLIC_KEY: Env.schema.string(),
+
+  /*
+|----------------------------------------------------------
+| Variables for signature data
+|----------------------------------------------------------
+*/
+  VOTE_TALLY_SIGNATURE_DATA: Env.schema.string(),
 })
