@@ -5,11 +5,7 @@ import SignatureService from '#services/signature_service'
 import env from '#start/env'
 
 export default class CandidateController {
-  private signatureService: SignatureService
-
-  constructor() {
-    this.signatureService = new SignatureService()
-  }
+  constructor(private signatureService: SignatureService) {}
 
   public async index({ request }: HttpContext) {
     const {

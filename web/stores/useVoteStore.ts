@@ -18,8 +18,6 @@ export const useVoteStore = create<VoteState>(() => ({
         )
         const votePayload = {
             candidates: ['AQUINOBAM2025'],
-            timestamp: Date.now(),
-            email: 'sebastiancurtislavarias@gmail.com',
         }
         const encoded = new TextEncoder().encode(JSON.stringify(votePayload))
         const signature = await window.crypto.subtle.sign(

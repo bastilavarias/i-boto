@@ -10,21 +10,24 @@ import HashingService from '#services/hashing_service'
 import VoteRecord from '#models/vote_record'
 import VoteTally from '#models/vote_tally'
 import env from '#start/env'
+import { inject } from '@adonisjs/core'
 
+@inject()
 export default class VoteController {
-  private encryptionService: EncryptionService
-  private signatureService: SignatureService
-  private hashingService: HashingService
-
-  constructor() {
-    this.encryptionService = new EncryptionService()
-    this.signatureService = new SignatureService()
-    this.hashingService = new HashingService()
-  }
+  constructor(
+    private encryptionService: EncryptionService,
+    private signatureService: SignatureService,
+    private hashingService: HashingService
+  ) {}
 
   public async create({ request, response }: HttpContext) {
     try {
-      let { vote, sig, pubKey } = request.only(['vote', 'sig', 'pubKey'])
+      let { vote, sig, pubKey } = request.only(['vote', 'sig', 'pubKey', 'user'])
+      //@ts-ignore
+      const user = request.user
+      if (!user) {
+        throw new Error('Impostor.SUS.')
+      }
       const isValidSignature = this.signatureService.verifyClientSignature(
         JSON.stringify(vote),
         sig,
@@ -48,13 +51,14 @@ export default class VoteController {
         throw new Error('Invalid vote process.')
       }
       await UserHistory.create({
-        user: this.hashingService.makeHash(vote.email),
+        user: this.hashingService.makeHash(user),
       })
 
       return response.status(200).json({
         message: 'Voted successfully!',
       })
     } catch (error) {
+      console.error(error.message)
       return response.unauthorized({
         message: error.message,
       })
@@ -74,9 +78,9 @@ export default class VoteController {
         const parsedVote = JSON.parse(vote)
         const decryptedVoteData = {
           ...parsedVote,
-          candidates: parsedVote.candidates.map((candidate: string) =>
-            this.encryptionService.decrypt(candidate)
-          ),
+          candidates: parsedVote.candidates.map((candidate: string) => {
+            return this.encryptionService.decrypt(candidate)
+          }),
         }
         const isValidSignature = this.signatureService.verifyClientSignature(
           JSON.stringify(decryptedVoteData),
@@ -113,14 +117,10 @@ export default class VoteController {
         await VoteRecord.create({
           cid: uploadedFile.toString(),
         })
-        await RawVote.query()
-          .whereIn(
-            'id',
-            rawVotes.map((rawVote) => rawVote.id)
-          )
-          .delete()
+        await RawVote.query().whereIn('id', idsToDelete).delete()
       }
     } catch (error) {
+      console.error(error.message)
       return error.message
     }
   }
@@ -184,6 +184,7 @@ export default class VoteController {
       voteRecord.tallied = true
       await voteRecord.save()
     } catch (error) {
+      console.error(error.message)
       return error.message
     }
   }

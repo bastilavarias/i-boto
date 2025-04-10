@@ -1,6 +1,7 @@
 import { BaseCommand } from '@adonisjs/core/ace'
 import type { CommandOptions } from '@adonisjs/core/types/ace'
 import VoteController from '#controllers/vote_controller'
+import { inject } from '@adonisjs/core'
 
 export default class VoteBatchCount extends BaseCommand {
   static commandName = 'vote:batch-count'
@@ -10,9 +11,9 @@ export default class VoteBatchCount extends BaseCommand {
     startApp: true,
   }
 
-  async run() {
+  @inject()
+  async run(voteController: VoteController) {
     try {
-      const voteController = new VoteController()
       await voteController.batchCount()
     } catch (error) {
       this.logger.error('Error during vote counting: ' + error.message)
