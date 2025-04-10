@@ -1,7 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, useMemo } from 'react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import {
@@ -15,23 +14,30 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AlertCircle, Search } from 'lucide-react'
 import { candidates } from '@/data'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Input } from '@/components/ui/input'
 import { useVoteStore } from '@/stores/useVoteStore'
+import { Candidate } from '@/type'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 
 interface BallotProps {
     isPublic?: boolean
 }
 
 export function Ballot({ isPublic = false }: BallotProps) {
-    const router = useRouter()
     const [selectedCandidates, setSelectedCandidates] = useState<string[]>([])
     const [showWarning, setShowWarning] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [searchTerm, setSearchTerm] = useState('')
 
     const voteStore = useVoteStore()
 
     const MAX_SELECTIONS = 12
+
+    const filteredCandidates = useMemo(() => {
+        return candidates.filter((candidate) =>
+            candidate.name.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+    }, [candidates, searchTerm])
 
     const onSelectCandidate = (candidateCode: string) => {
         setSelectedCandidates((prev) => {
@@ -70,6 +76,24 @@ export function Ballot({ isPublic = false }: BallotProps) {
             alert('Invalid vote!')
         }
         setIsSubmitting(false)
+    }
+
+    function CandidateAvatar(candidate: Candidate) {
+        return (
+            <Avatar className="h-20 w-20">
+                <AvatarImage asChild>
+                    <Image
+                        src={`/images/candidates/2025/senate/${candidate.code}.png`}
+                        alt={candidate.name}
+                        width={80}
+                        height={80}
+                        loading="lazy"
+                        className="object-cover"
+                    />
+                </AvatarImage>
+                <AvatarFallback>{candidate.placement}</AvatarFallback>
+            </Avatar>
+        )
     }
 
     return (
@@ -136,6 +160,8 @@ export function Ballot({ isPublic = false }: BallotProps) {
                                 type="search"
                                 placeholder="Search candidate"
                                 className="pl-8 w-full sm:w-64"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
                     </div>
@@ -151,10 +177,10 @@ export function Ballot({ isPublic = false }: BallotProps) {
                     )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                        {candidates.map((candidate) => (
+                        {filteredCandidates.map((candidate) => (
                             <div
                                 key={candidate.code}
-                                className={`flex items-center gap-3 p-3 h-32 border rounded-md ${
+                                className={`flex items-center gap-3 p-3 h-32 border rounded-md cursor-pointer ${
                                     selectedCandidates.includes(candidate.code)
                                         ? 'bg-green-50 border-green-300'
                                         : 'bg-white'
@@ -164,7 +190,7 @@ export function Ballot({ isPublic = false }: BallotProps) {
                                 }
                             >
                                 <Checkbox
-                                    id={`candidate-mobile-${candidate.code}`}
+                                    id={`candidate-checkbox-${candidate.code}`}
                                     checked={selectedCandidates.includes(
                                         candidate.code
                                     )}
@@ -175,7 +201,7 @@ export function Ballot({ isPublic = false }: BallotProps) {
                                 <div className="flex items-center gap-3 flex-1">
                                     <div>
                                         <label
-                                            htmlFor={`candidate-mobile-${candidate.placement}`}
+                                            htmlFor={`candidate-checkbox-${candidate.placement}`}
                                             className="font-medium cursor-pointer"
                                         >
                                             {candidate.placement}.{' '}
@@ -186,15 +212,7 @@ export function Ballot({ isPublic = false }: BallotProps) {
                                         </p>
                                     </div>
                                 </div>
-                                <Avatar className="h-20 w-20">
-                                    <AvatarImage
-                                        src={candidate.image_url}
-                                        alt={candidate.name}
-                                    />
-                                    <AvatarFallback>
-                                        {candidate.name}
-                                    </AvatarFallback>
-                                </Avatar>
+                                <CandidateAvatar candidate={candidate} />
                             </div>
                         ))}
                     </div>

@@ -25,9 +25,4 @@ export default class AuthController {
       return response.unauthorized({ message: 'Invalid token' })
     }
   }
-
-  public async logout({ response }: HttpContext) {
-    response.clearCookie('session')
-    return response.ok({ message: 'Logged out' })
-  }
 }
