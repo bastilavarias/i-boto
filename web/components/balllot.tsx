@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { AlertCircle, CheckCircle2, Search } from 'lucide-react'
+import { AlertCircle, Search } from 'lucide-react'
 import { candidates } from '@/data'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Input } from '@/components/ui/input'
@@ -25,33 +25,22 @@ interface BallotProps {
 
 export function Ballot({ isPublic = false }: BallotProps) {
     const router = useRouter()
-    const [selectedCandidates, setSelectedCandidates] = useState<number[]>([])
+    const [selectedCandidates, setSelectedCandidates] = useState<string[]>([])
     const [showWarning, setShowWarning] = useState(false)
-    const [hasVoted, setHasVoted] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
 
-    const { vote } = useVoteStore()
+    const voteStore = useVoteStore()
 
     const MAX_SELECTIONS = 12
 
-    useEffect(() => {
-        const storedVotes = localStorage.getItem('mockElectionVotes')
-        if (storedVotes) {
-            setSelectedCandidates(JSON.parse(storedVotes))
-            setHasVoted(true)
-        }
-    }, [])
-
-    const handleCandidateSelect = (candidateId: number) => {
-        if (hasVoted) return
-
+    const onSelectCandidate = (candidateCode: string) => {
         setSelectedCandidates((prev) => {
-            if (prev.includes(candidateId)) {
-                return prev.filter((id) => id !== candidateId)
+            if (prev.includes(candidateCode)) {
+                return prev.filter((code) => code !== candidateCode)
             }
 
             if (prev.length < MAX_SELECTIONS) {
-                return [...prev, candidateId]
+                return [...prev, candidateCode]
             }
 
             setShowWarning(true)
@@ -69,106 +58,18 @@ export function Ballot({ isPublic = false }: BallotProps) {
         }
     }, [showWarning])
 
-    const handleSubmit = () => {
-        if (hasVoted || selectedCandidates.length === 0) return
-
+    const submitVotes = async () => {
+        if (selectedCandidates.length === 0 || selectedCandidates.length > 12) {
+            throw new Error('Vote at least 1 - 12 candidate/s')
+        }
         setIsSubmitting(true)
-
-        localStorage.setItem(
-            'mockElectionVotes',
-            JSON.stringify(selectedCandidates)
-        )
-
-        const existingResults = localStorage.getItem('mockElectionResults')
-        const results = existingResults ? JSON.parse(existingResults) : {}
-
-        selectedCandidates.forEach((id) => {
-            results[id] = (results[id] || 0) + 1
-        })
-
-        results.lastUpdated = new Date().toISOString()
-
-        localStorage.setItem('mockElectionResults', JSON.stringify(results))
-
-        setTimeout(() => {
-            setHasVoted(true)
-            setIsSubmitting(false)
-        }, 1500)
-    }
-
-    if (hasVoted) {
-        return (
-            <div className="max-w-4xl mx-auto">
-                <Card className="shadow-lg">
-                    <CardHeader className="text-center bg-green-50 border-b">
-                        <CheckCircle2 className="w-16 h-16 mx-auto text-green-500 mb-2" />
-                        <CardTitle className="text-2xl text-green-700">
-                            Your Vote Has Been Recorded
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-6">
-                        <h3 className="text-lg font-medium mb-4">
-                            You have selected the following candidates:
-                        </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                            {selectedCandidates.map((id) => {
-                                const candidate = candidates.find(
-                                    (c) => c.id === id
-                                )
-                                return (
-                                    <div
-                                        key={id}
-                                        className="flex items-center gap-3 p-3 border rounded-md bg-gray-50"
-                                    >
-                                        <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-100">
-                                            <Image
-                                                src={`/placeholder.svg?height=40&width=40&text=${id}`}
-                                                alt={candidate?.name || ''}
-                                                fill
-                                                className="object-cover"
-                                            />
-                                        </div>
-                                        <div>
-                                            <p className="font-medium">
-                                                {candidate?.name}
-                                            </p>
-                                            <p className="text-sm text-gray-500">
-                                                ({candidate?.party})
-                                            </p>
-                                        </div>
-                                    </div>
-                                )
-                            })}
-                        </div>
-                        <div className="flex flex-col sm:flex-row justify-center gap-4">
-                            {isPublic ? (
-                                <Button onClick={() => router.push('/results')}>
-                                    View Results
-                                </Button>
-                            ) : (
-                                <>
-                                    <Button
-                                        variant="outline"
-                                        onClick={() =>
-                                            router.push('/dashboard')
-                                        }
-                                    >
-                                        Return to Dashboard
-                                    </Button>
-                                    <Button
-                                        onClick={() =>
-                                            router.push('/dashboard/results')
-                                        }
-                                    >
-                                        View Results
-                                    </Button>
-                                </>
-                            )}
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-        )
+        const result = await voteStore.submit(selectedCandidates)
+        if (result?.ok) {
+            alert('Votes submitted!')
+        } else {
+            alert('Invalid vote!')
+        }
+        setIsSubmitting(false)
     }
 
     return (
@@ -252,32 +153,33 @@ export function Ballot({ isPublic = false }: BallotProps) {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         {candidates.map((candidate) => (
                             <div
-                                key={candidate.id}
+                                key={candidate.code}
                                 className={`flex items-center gap-3 p-3 h-32 border rounded-md ${
-                                    selectedCandidates.includes(candidate.id)
+                                    selectedCandidates.includes(candidate.code)
                                         ? 'bg-green-50 border-green-300'
                                         : 'bg-white'
                                 }`}
                                 onClick={() =>
-                                    handleCandidateSelect(candidate.id)
+                                    onSelectCandidate(candidate.code)
                                 }
                             >
                                 <Checkbox
-                                    id={`candidate-mobile-${candidate.id}`}
+                                    id={`candidate-mobile-${candidate.code}`}
                                     checked={selectedCandidates.includes(
-                                        candidate.id
+                                        candidate.code
                                     )}
                                     onCheckedChange={() =>
-                                        handleCandidateSelect(candidate.id)
+                                        onSelectCandidate(candidate.code)
                                     }
                                 />
                                 <div className="flex items-center gap-3 flex-1">
                                     <div>
                                         <label
-                                            htmlFor={`candidate-mobile-${candidate.id}`}
+                                            htmlFor={`candidate-mobile-${candidate.placement}`}
                                             className="font-medium cursor-pointer"
                                         >
-                                            {candidate.id}. {candidate.name}
+                                            {candidate.placement}.{' '}
+                                            {candidate.name}
                                         </label>
                                         <p className="text-sm text-gray-500">
                                             ({candidate.party})
@@ -303,7 +205,7 @@ export function Ballot({ isPublic = false }: BallotProps) {
                         <div className="flex justify-center">
                             <Button
                                 size="lg"
-                                onClick={vote}
+                                onClick={submitVotes}
                                 disabled={
                                     selectedCandidates.length === 0 ||
                                     isSubmitting
@@ -321,16 +223,6 @@ export function Ballot({ isPublic = false }: BallotProps) {
                             </Button>
                         </div>
                     )}
-                    <Button size="lg" onClick={vote} className="px-8">
-                        {isSubmitting ? (
-                            <>
-                                <div className="border-2 border-white border-t-transparent rounded-full w-5 h-5 animate-spin mr-2"></div>
-                                Submitting...
-                            </>
-                        ) : (
-                            'Submit Ballot'
-                        )}
-                    </Button>
                 </CardFooter>
             </Card>
         </div>

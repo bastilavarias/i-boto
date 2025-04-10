@@ -1,6 +1,6 @@
 export interface Candidate {
-    id: number;
-    name: string;
-    party: string;
-    image_url: string;
+    placement: number
+    name: string
+    code: string
+    party: string
 }

@@ -17,7 +17,6 @@ import { useAuth } from '@/hooks/useAuth'
 
 export function LoginContent() {
     const { user, login } = useAuth()
-    const { setToken } = useAuth()
     const router = useRouter()
     const [isLoading, setIsLoading] = useState(false)
 
@@ -26,7 +25,6 @@ export function LoginContent() {
         try {
             await login()
             if (user) {
-                await setToken()
                 router.push('/dashboard')
                 setIsLoading(false)
             }
