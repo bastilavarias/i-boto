@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import Image from 'next/image'
 import { AlertCircle, Search } from 'lucide-react'
-
 import { Button } from '@/components/ui/button'
 import {
     Card,
@@ -20,6 +19,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { candidates } from '@/data'
 import { Candidate } from '@/type'
 import { useVoteStore } from '@/stores/useVoteStore'
+import { CandidateAvatar } from '@/components/candidate-avatar'
 
 interface BallotProps {
     isPublic?: boolean
@@ -80,30 +80,9 @@ export function Ballot({ isPublic = false }: BallotProps) {
         }
     }, [showWarning])
 
-    const CandidateAvatar = ({ candidate }: { candidate: Candidate }) => {
-        const source = `/images/candidates/2025/senate/${candidate.code}.png`
-
-        return (
-            <Avatar className="h-20 w-20">
-                <AvatarImage asChild src={source}>
-                    <Image
-                        src={source}
-                        alt={candidate.name}
-                        width={80}
-                        height={80}
-                        loading="lazy"
-                        className="object-cover"
-                    />
-                </AvatarImage>
-                <AvatarFallback>{candidate.placement}</AvatarFallback>
-            </Avatar>
-        )
-    }
-
     return (
         <div className="space-y-6">
             <Card className="w-full max-w-7xl mx-auto shadow-lg bg-gray-50">
-                {/* Header Section */}
                 <CardHeader>
                     <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                         <div className="flex items-center gap-4">

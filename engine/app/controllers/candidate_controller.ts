@@ -3,7 +3,9 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Candidate from '#models/candidate'
 import SignatureService from '#services/signature_service'
 import env from '#start/env'
+import { inject } from '@adonisjs/core'
 
+@inject()
 export default class CandidateController {
   constructor(private signatureService: SignatureService) {}
 
