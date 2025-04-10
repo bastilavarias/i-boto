@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import Image from 'next/image'
+import { AlertCircle, Search } from 'lucide-react'
+
 import { Button } from '@/components/ui/button'
 import {
     Card,
@@ -12,16 +14,18 @@ import {
 } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { AlertCircle, Search } from 'lucide-react'
-import { candidates } from '@/data'
 import { Input } from '@/components/ui/input'
-import { useVoteStore } from '@/stores/useVoteStore'
-import { Candidate } from '@/type'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+
+import { candidates } from '@/data'
+import { Candidate } from '@/type'
+import { useVoteStore } from '@/stores/useVoteStore'
 
 interface BallotProps {
     isPublic?: boolean
 }
+
+const MAX_SELECTIONS = 12
 
 export function Ballot({ isPublic = false }: BallotProps) {
     const [selectedCandidates, setSelectedCandidates] = useState<string[]>([])
@@ -30,8 +34,6 @@ export function Ballot({ isPublic = false }: BallotProps) {
     const [searchTerm, setSearchTerm] = useState('')
 
     const voteStore = useVoteStore()
-
-    const MAX_SELECTIONS = 12
 
     const filteredCandidates = useMemo(() => {
         return candidates.filter((candidate) =>
@@ -54,16 +56,6 @@ export function Ballot({ isPublic = false }: BallotProps) {
         })
     }
 
-    useEffect(() => {
-        if (showWarning) {
-            const timer = setTimeout(() => {
-                setShowWarning(false)
-            }, 3000)
-
-            return () => clearTimeout(timer)
-        }
-    }, [showWarning])
-
     const submitVotes = async () => {
         if (selectedCandidates.length === 0 || selectedCandidates.length > 12) {
             throw new Error('Vote at least 1 - 12 candidate/s')
@@ -78,12 +70,24 @@ export function Ballot({ isPublic = false }: BallotProps) {
         setIsSubmitting(false)
     }
 
-    function CandidateAvatar(candidate: Candidate) {
+    useEffect(() => {
+        if (showWarning) {
+            const timer = setTimeout(() => {
+                setShowWarning(false)
+            }, 3000)
+
+            return () => clearTimeout(timer)
+        }
+    }, [showWarning])
+
+    const CandidateAvatar = ({ candidate }: { candidate: Candidate }) => {
+        const source = `/images/candidates/2025/senate/${candidate.code}.png`
+
         return (
             <Avatar className="h-20 w-20">
-                <AvatarImage asChild>
+                <AvatarImage asChild src={source}>
                     <Image
-                        src={`/images/candidates/2025/senate/${candidate.code}.png`}
+                        src={source}
                         alt={candidate.name}
                         width={80}
                         height={80}
@@ -99,6 +103,7 @@ export function Ballot({ isPublic = false }: BallotProps) {
     return (
         <div className="space-y-6">
             <Card className="w-full max-w-7xl mx-auto shadow-lg bg-gray-50">
+                {/* Header Section */}
                 <CardHeader>
                     <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                         <div className="flex items-center gap-4">
@@ -122,6 +127,7 @@ export function Ballot({ isPublic = false }: BallotProps) {
                         </div>
                     </div>
                 </CardHeader>
+
                 <CardContent>
                     <div className="mt-4 p-4 bg-white border rounded-md">
                         <h2 className="font-semibold text-lg mb-2">
@@ -152,6 +158,7 @@ export function Ballot({ isPublic = false }: BallotProps) {
                         </div>
                     </div>
 
+                    {/* Search and Title */}
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5">
                         <CardTitle>All Candidates</CardTitle>
                         <div className="relative">

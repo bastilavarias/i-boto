@@ -91,7 +91,9 @@ export function DashboardContent() {
                         </p>
                         <div className="mt-4">
                             <Button asChild variant="outline">
-                                <Link href="/results">View Results</Link>
+                                <Link href="/dashboard/results">
+                                    View Results
+                                </Link>
                             </Button>
                         </div>
                     </CardContent>
