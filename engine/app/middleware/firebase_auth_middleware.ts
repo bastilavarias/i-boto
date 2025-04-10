@@ -11,7 +11,9 @@ export default class FirebaseAuthMiddleware {
     }
 
     try {
-      await firebaseAuth.verifyIdToken(token)
+      const user = await firebaseAuth.verifyIdToken(token)
+      //@ts-ignore
+      ctx.request.user = user.firebase.identities.email[0]
       await next()
     } catch (error) {
       return ctx.response.unauthorized({ message: 'Invalid or expired token' })
