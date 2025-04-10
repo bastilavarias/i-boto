@@ -212,11 +212,9 @@ export function Ballot({ isPublic = false }: BallotProps) {
                         </ol>
                     </div>
                 </CardContent>
-            </Card>
 
-            <Card className="pt-0">
-                <CardContent className="p-4 md:p-6">
-                    <div className="bg-green-50 p-4 rounded-md mb-6 text-center">
+                <CardContent className="">
+                    <div className="bg-green-100 p-4 rounded-md mb-6 text-center">
                         <h2 className="text-xl md:text-2xl font-bold text-green-800">
                             Senatorial Candidates
                         </h2>

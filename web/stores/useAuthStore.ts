@@ -10,6 +10,7 @@ type AuthState = {
 export const useAuthStore = create<AuthState>((set) => ({
     isAuthenticated: false,
     user: null,
+
     setToken: async (user) => {
         try {
             await fetch('http://localhost:3333/api/auth/set-token', {
@@ -20,6 +21,7 @@ export const useAuthStore = create<AuthState>((set) => ({
             })
             set({ isAuthenticated: true, user })
         } catch (e) {
+            set({ isAuthenticated: false, user: null })
             console.error(e)
         }
     },
