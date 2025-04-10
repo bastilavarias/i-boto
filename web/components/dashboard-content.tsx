@@ -15,37 +15,34 @@ import { Vote, BarChart3, Users } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 
 export function DashboardContent() {
-    const { user } = useAuth()
+    const { user, logout } = useAuth()
 
     const [hasVoted, setHasVoted] = useState(false)
     const [totalVotes, setTotalVotes] = useState(0)
     const [voterParticipation, setVoterParticipation] = useState(0)
+    const [authUser, setAuthUser] = useState(null)
 
     useEffect(() => {
-        // Check if user has voted
-        const userVotes = localStorage.getItem('mockElectionVotes')
-        setHasVoted(!!userVotes)
-
-        // Get total votes
-        const allVotes = localStorage.getItem('mockElectionResults')
-        if (allVotes) {
-            const votesData = JSON.parse(allVotes)
-            const total = Object.values(votesData).reduce(
-                (sum: number, count: any) => sum + count,
-                0
-            )
-            setTotalVotes(total)
-
-            // Simulate voter participation (random between 60-85%)
-            setVoterParticipation(Math.floor(Math.random() * 25) + 60)
+        if (user) {
+            setAuthUser(Object.assign(user))
         }
-    }, [])
+    }, [user])
 
     return (
         <div className="space-y-6">
             <div>
                 <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-                <p className="text-gray-500">Welcome {user?.displayName},</p>
+                {authUser && (
+                    <p className="text-gray-500">
+                        Welcome {authUser?.displayName},{' '}
+                        <span
+                            className="underline cursor-pointer"
+                            onClick={logout}
+                        >
+                            Logout
+                        </span>
+                    </p>
+                )}
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
