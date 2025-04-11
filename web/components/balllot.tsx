@@ -2,24 +2,25 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import Image from 'next/image'
-import { AlertCircle, Search } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import {
-    Card,
-    CardContent,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Input } from '@/components/ui/input'
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-
 import { candidates } from '@/data'
-import { Candidate } from '@/type'
 import { useVoteStore } from '@/stores/useVoteStore'
 import { CandidateAvatar } from '@/components/candidate-avatar'
+import { toast } from 'sonner'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog'
+import { ReceiptContent } from '@/components/receipt-content'
 
 interface BallotProps {
     isPublic?: boolean
@@ -32,8 +33,33 @@ export function Ballot({ isPublic = false }: BallotProps) {
     const [showWarning, setShowWarning] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [searchTerm, setSearchTerm] = useState('')
+    const [isReceiptDialog, setIsReceiptDialog] = useState(false)
 
     const voteStore = useVoteStore()
+
+    const SubmitButton = () => {
+        return (
+            <Button
+                size="lg"
+                onClick={submitVotes}
+                disabled={
+                    selectedCandidates.length === 0 ||
+                    selectedCandidates.length > 12 ||
+                    isSubmitting
+                }
+                className="px-8"
+            >
+                {isSubmitting ? (
+                    <>
+                        <div className="border-2 border-white border-t-transparent rounded-full w-5 h-5 animate-spin mr-2"></div>
+                        Submitting...
+                    </>
+                ) : (
+                    'Submit Ballot'
+                )}
+            </Button>
+        )
+    }
 
     const filteredCandidates = useMemo(() => {
         return candidates.filter((candidate) =>
@@ -61,28 +87,26 @@ export function Ballot({ isPublic = false }: BallotProps) {
             throw new Error('Vote at least 1 - 12 candidate/s')
         }
         setIsSubmitting(true)
-        const result = await voteStore.submit(selectedCandidates)
-        if (result?.ok) {
-            alert('Votes submitted!')
-        } else {
-            alert('Invalid vote!')
-        }
+        setIsReceiptDialog(true)
+        // const result = await voteStore.submit(selectedCandidates)
+        // if (result?.ok) {
+        //     toast.success('Congratulations! Your ballot successfully recorded.')
+        // } else {
+        //     toast.error('Vote submission failed. Please try again later.')
+        // }
         setIsSubmitting(false)
     }
 
     useEffect(() => {
         if (showWarning) {
-            const timer = setTimeout(() => {
-                setShowWarning(false)
-            }, 3000)
-
-            return () => clearTimeout(timer)
+            toast.warning('You can only select up to 12 candidates.')
+            setShowWarning(false)
         }
     }, [showWarning])
 
     return (
         <div className="space-y-6">
-            <Card className="w-full max-w-7xl mx-auto shadow-lg bg-gray-50">
+            <Card className="w-full mx-auto">
                 <CardHeader>
                     <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                         <div className="flex items-center gap-4">
@@ -122,113 +146,105 @@ export function Ballot({ isPublic = false }: BallotProps) {
                         </ol>
                     </div>
                 </CardContent>
+            </Card>
 
-                <CardContent className="">
-                    <div className="bg-green-100 p-4 rounded-md mb-6 text-center">
-                        <h2 className="text-xl md:text-2xl font-bold text-green-800">
-                            Senatorial Candidates
-                        </h2>
-                        <p className="text-green-700 font-medium">
-                            (BUMOTO NG HINDI HIHIGIT SA 12)
+            <div className="space-y-4">
+                <Card className="sticky left-0 top-[6.5%] z-10 rounded-none shadow-none pt-0">
+                    <div className="bg-green-100 text-center p-2 flex-col justify-between">
+                        <div className="" />
+                        <p className="font-bold text-green-800">
+                            Senatorial Candidates (BUMOTO NG HINDI HIHIGIT SA
+                            12)
                         </p>
-                        <div className="mt-2 text-sm bg-white p-2 rounded border border-green-200">
-                            Selected: {selectedCandidates.length} of{' '}
+                        <p className="font-medium text-green-800">
+                            Selected: {selectedCandidates.length} {' out of '}
                             {MAX_SELECTIONS}
-                        </div>
+                        </p>
                     </div>
-
-                    {/* Search and Title */}
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5">
-                        <CardTitle>All Candidates</CardTitle>
-                        <div className="relative">
-                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-                            <Input
-                                type="search"
-                                placeholder="Search candidate"
-                                className="pl-8 w-full sm:w-64"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
-                        </div>
-                    </div>
-
-                    {showWarning && (
-                        <Alert variant="destructive" className="mb-4">
-                            <AlertCircle className="h-4 w-4" />
-                            <AlertDescription>
-                                You can only select up to 12 candidates. Please
-                                deselect a candidate before selecting a new one.
-                            </AlertDescription>
-                        </Alert>
-                    )}
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                        {filteredCandidates.map((candidate) => (
-                            <div
-                                key={candidate.code}
-                                className={`flex items-center gap-3 p-3 h-32 border rounded-md cursor-pointer ${
-                                    selectedCandidates.includes(candidate.code)
-                                        ? 'bg-green-50 border-green-300'
-                                        : 'bg-white'
-                                }`}
-                                onClick={() =>
-                                    onSelectCandidate(candidate.code)
-                                }
-                            >
-                                <Checkbox
-                                    id={`candidate-checkbox-${candidate.code}`}
-                                    checked={selectedCandidates.includes(
-                                        candidate.code
-                                    )}
-                                    onCheckedChange={() =>
-                                        onSelectCandidate(candidate.code)
+                    <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex items-center space-x-2">
+                            <CardTitle>All Candidates</CardTitle>
+                            <div className="relative">
+                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+                                <Input
+                                    type="search"
+                                    placeholder="Search candidate"
+                                    className="pl-8 w-full sm:w-64"
+                                    value={searchTerm}
+                                    onChange={(e) =>
+                                        setSearchTerm(e.target.value)
                                     }
                                 />
-                                <div className="flex items-center gap-3 flex-1">
-                                    <div>
-                                        <label
-                                            htmlFor={`candidate-checkbox-${candidate.placement}`}
-                                            className="font-medium cursor-pointer"
-                                        >
-                                            {candidate.placement}.{' '}
-                                            {candidate.name}
-                                        </label>
-                                        <p className="text-sm text-gray-500">
-                                            ({candidate.party})
-                                        </p>
-                                    </div>
-                                </div>
-                                <CandidateAvatar candidate={candidate} />
                             </div>
-                        ))}
-                    </div>
-                </CardContent>
+                        </div>
+                        <div>
+                            <SubmitButton />
+                        </div>
+                    </CardHeader>
+                </Card>
 
-                <CardFooter className="justify-center">
-                    {!isPublic && (
-                        <div className="flex justify-center">
-                            <Button
-                                size="lg"
-                                onClick={submitVotes}
-                                disabled={
-                                    selectedCandidates.length === 0 ||
-                                    isSubmitting
-                                }
-                                className="px-8"
-                            >
-                                {isSubmitting ? (
-                                    <>
-                                        <div className="border-2 border-white border-t-transparent rounded-full w-5 h-5 animate-spin mr-2"></div>
-                                        Submitting...
-                                    </>
-                                ) : (
-                                    'Submit Ballot'
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {filteredCandidates.map((candidate) => (
+                        <div
+                            key={candidate.code}
+                            className={`flex items-center gap-3 p-3 h-32 border rounded-md cursor-pointer ${
+                                selectedCandidates.includes(candidate.code)
+                                    ? 'bg-green-50 border-green-300'
+                                    : 'bg-white'
+                            }`}
+                            onClick={() => onSelectCandidate(candidate.code)}
+                        >
+                            <Checkbox
+                                id={`candidate-checkbox-${candidate.code}`}
+                                checked={selectedCandidates.includes(
+                                    candidate.code
                                 )}
-                            </Button>
+                                onCheckedChange={() =>
+                                    onSelectCandidate(candidate.code)
+                                }
+                            />
+                            <div className="flex items-center gap-3 flex-1">
+                                <div>
+                                    <label
+                                        htmlFor={`candidate-checkbox-${candidate.placement}`}
+                                        className="font-medium cursor-pointer"
+                                    >
+                                        {candidate.placement}. {candidate.name}
+                                    </label>
+                                    <p className="text-sm text-gray-500">
+                                        ({candidate.party})
+                                    </p>
+                                </div>
+                            </div>
+                            <CandidateAvatar candidate={candidate} />
+                        </div>
+                    ))}
+                </div>
+
+                <div className="justify-center">
+                    {!isPublic && (
+                        <div className="w-full py-6 flex justify-center">
+                            <SubmitButton />
                         </div>
                     )}
-                </CardFooter>
-            </Card>
+                </div>
+            </div>
+
+            <Dialog open={isReceiptDialog} onOpenChange={setIsReceiptDialog}>
+                <DialogContent className="bg-white">
+                    <DialogHeader>
+                        <DialogTitle>Edit profile</DialogTitle>
+                        <DialogDescription>
+                            Make changes to your profile here. Click save when
+                            you're done.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <ReceiptContent />
+                    <DialogFooter>
+                        <Button type="submit">Save changes</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }

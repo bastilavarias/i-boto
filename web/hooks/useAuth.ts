@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import {
     onAuthStateChanged,
     signInWithPopup,
@@ -7,10 +7,10 @@ import {
     User,
     browserLocalPersistence,
     setPersistence,
-    getIdTokenResult,
 } from 'firebase/auth'
 import { auth } from '../lib/firebase'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 
 const provider = new GoogleAuthProvider()
 
@@ -79,6 +79,7 @@ export function useAuth(): UseAuthReturn {
             setIsAuthenticated(true)
         } catch (e) {
             console.error(e)
+            toast.warning('Session Expired')
             await logout()
         }
     }

@@ -14,6 +14,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet'
 import { useAuth } from '@/hooks/useAuth'
+import { Toaster } from '@/components/ui/sonner'
 
 interface MainLayoutProps {
     children: React.ReactNode
@@ -196,7 +197,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                 </div>
             </header>
 
-            <main className="flex-1">
+            <main className="flex-1 relative">
                 <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                     {booted && children}
                 </div>
@@ -209,6 +210,8 @@ export function MainLayout({ children }: MainLayoutProps) {
                     </div>
                 </div>
             </footer>
+
+            <Toaster />
         </div>
     )
 }

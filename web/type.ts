@@ -3,5 +3,5 @@ export interface Candidate {
     name: string
     code: string
     party: string
-    votes?: number
+    votes: number
 }
