@@ -87,7 +87,7 @@ export function ResultContent() {
                 </div>
             )}
 
-            <Card className="shadow-none border-0 pt-0 bg-white">
+            <Card className="shadow-none border-0 pt-0 bg-none bg-transparent">
                 <CardHeader>
                     <CardTitle className="text-xl font-bold">
                         🏆 Magic 12
@@ -103,7 +103,7 @@ export function ResultContent() {
                             {leadingCandidates.map((candidate, index) => (
                                 <div
                                     key={candidate.code}
-                                    className="flex items-start gap-3 p-3 border rounded-md space-y-4"
+                                    className="flex items-start gap-3 p-3 border rounded-md space-y-4 bg-white"
                                 >
                                     <div
                                         className={cn(
@@ -157,7 +157,7 @@ export function ResultContent() {
                 </CardContent>
             </Card>
 
-            <Card className="shadow-none border-0 pt-0 bg-white">
+            <Card className="shadow-none border-0 pt-0 bg-none bg-transparent">
                 <CardHeader>
                     <CardTitle className="text-xl font-bold">
                         🔥 All Candidates
@@ -173,7 +173,7 @@ export function ResultContent() {
                             {leadingCandidates.map((candidate, index) => (
                                 <div
                                     key={candidate.code}
-                                    className="flex items-start gap-3 p-3 border rounded-md space-y-4"
+                                    className="flex items-start gap-3 p-3 border rounded-md space-y-4 bg-white"
                                 >
                                     <div
                                         className={cn(
