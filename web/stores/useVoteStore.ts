@@ -7,6 +7,7 @@ type VoteState = {
 export const useVoteStore = create<VoteState>(() => ({
     submit: async (codes: string[]) => {
         try {
+            // TODO: Put this in the index db
             const keyPair = await window.crypto.subtle.generateKey(
                 {
                     name: 'RSASSA-PKCS1-v1_5',

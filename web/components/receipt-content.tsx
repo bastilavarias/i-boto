@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import html2canvas from 'html2canvas-pro'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,139 +11,23 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover'
-
-// eslint-disable-next-line react/display-name
-const ReceiptPreview = React.forwardRef<
-    HTMLDivElement,
-    {
-        colors: {
-            primary: string
-            secondary: string
-            text: string
-            accent: string
-            bg: string
-        }
-        candidates: {
-            rank: number
-            name: string
-            party: string
-            score: number
-        }[]
-    }
->(({ colors, candidates }, ref) => (
-    <div
-        ref={ref}
-        className="survey-content"
-        style={{
-            backgroundColor: colors.bg,
-            color: colors.text,
-            fontFamily: "'Poppins', sans-serif",
-            width: '100%',
-            boxSizing: 'border-box',
-        }}
-    >
-        {/* Header with fixed sizing */}
-        <div className="mb-8" style={{ fontSize: '28px', lineHeight: '1.2' }}>
-            <div
-                className="font-bold uppercase tracking-wider mb-1"
-                style={{ color: colors.primary }}
-            >
-                ARKIPELAGO ANALYTICS
-            </div>
-            <div
-                className="font-bold uppercase tracking-wider mb-2"
-                style={{ color: colors.primary }}
-            >
-                SURVEY
-            </div>
-            <div
-                className="font-semibold uppercase tracking-wider"
-                style={{
-                    color: colors.secondary,
-                    fontSize: '24px',
-                }}
-            >
-                2025 SENATORIAL PREFERENCES
-            </div>
-        </div>
-
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-            <div
-                className="font-medium italic"
-                style={{
-                    color: colors.accent,
-                    fontSize: '20px',
-                }}
-            >
-                arkipelago
-            </div>
-            <div style={{ fontSize: '16px', maxWidth: '600px' }}>
-                The latest Arkipelago Analytics survey, conducted from March 15
-                to 21, 2025, shows
-                <br />
-                reelectionist Sen. Bong Go leading with 64 percent of the vote.
-            </div>
-        </div>
-
-        {/* Candidates List with fixed sizing */}
-        <div className="space-y-2" style={{ fontSize: '18px' }}>
-            {candidates.map((candidate) => (
-                <div
-                    key={candidate.rank}
-                    className="flex items-baseline gap-4"
-                    style={{ lineHeight: '1.4' }}
-                >
-                    <div
-                        className="font-bold w-8 text-right flex-shrink-0"
-                        style={{
-                            color:
-                                candidate.rank <= 3
-                                    ? colors.accent
-                                    : colors.text,
-                        }}
-                    >
-                        {candidate.rank}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                        <div className="font-bold truncate">
-                            {candidate.name}
-                        </div>
-                        <div
-                            style={{
-                                fontSize: '14px',
-                                opacity: 0.8,
-                            }}
-                        >
-                            ({candidate.party})
-                        </div>
-                    </div>
-                    <div
-                        className="font-bold flex-shrink-0"
-                        style={{
-                            color:
-                                candidate.rank <= 3
-                                    ? colors.accent
-                                    : colors.text,
-                        }}
-                    >
-                        {candidate.score.toFixed(1)}
-                    </div>
-                </div>
-            ))}
-        </div>
-    </div>
-))
+import Image from 'next/image'
+import { CandidateAvatar } from '@/components/candidate-avatar'
+import { Candidate } from '@/type'
+import { Vote } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { candidates } from '@/data'
 
 export function ReceiptContent() {
+    const [candidateCodes, setCandidateCodes] = useState([])
     const [colors, setColors] = useState({
-        primary: '#1E40AF',
-        secondary: '#1E3A8A',
-        text: '#1F2937',
-        accent: '#DC2626',
+        text: '#000000',
         bg: '#FFFFFF',
     })
 
     const surveyRef = useRef<HTMLDivElement>(null)
+
+    const router = useRouter()
 
     const handleColorChange = (key: keyof typeof colors, value: string) => {
         setColors((prev) => ({ ...prev, [key]: value }))
@@ -159,6 +43,7 @@ export function ReceiptContent() {
             container.style.top = '0'
             container.style.width = '1080px'
             container.style.padding = '40px'
+            container.style.paddingBottom = '60px'
             container.style.backgroundColor = colors.bg
             container.style.zIndex = '99999'
             container.style.fontFamily = "'Poppins', sans-serif"
@@ -196,35 +81,80 @@ export function ReceiptContent() {
         }
     }
 
-    const candidates = [
-        { rank: 1, name: 'GO, BONG GO', party: 'PDPLBN', score: 64.0 },
-    ]
+    useEffect(() => {
+        const localCandidates =
+            JSON.parse(localStorage.getItem('candidates') as string) || []
+        if (!localCandidates.length) {
+            router.push('/dashboard')
+        }
+        console.log(localCandidates)
+        setCandidateCodes(localCandidates)
+    }, [])
+
+    const filteredCandidates = useMemo(
+        () =>
+            candidateCodes
+                .map((code: Candidate) => {
+                    const candidate =
+                        candidates.find(
+                            (_candidate) => _candidate.code === code
+                        ) || null
+                    if (candidate) {
+                        return candidate
+                    }
+                    return null
+                })
+                .filter((candidate) => candidate),
+        [candidates, candidateCodes]
+    )
 
     return (
         <div className="p-4 md:p-6 font-sans min-h-screen bg-gray-50">
-            <div className="max-w-6xl mx-auto">
-                <Card className="mb-6">
-                    <CardHeader>
-                        <CardTitle>Customize Survey Appearance</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-4">
-                            {Object.entries(colors).map(([key, value]) => (
-                                <div key={key}>
-                                    <Label htmlFor={key} className="capitalize">
-                                        {key} Color
-                                    </Label>
-                                    <Popover>
-                                        <PopoverTrigger asChild>
-                                            <div className="flex items-center gap-2">
-                                                <div
-                                                    className="w-8 h-8 rounded-md border cursor-pointer"
-                                                    style={{
-                                                        backgroundColor: value,
-                                                    }}
-                                                />
+            {filteredCandidates.length && (
+                <div className="mx-auto">
+                    <Card className="mb-5">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Customize Local Receipt
+                            </CardTitle>
+                            <Vote className="h-4 w-4 text-gray-500" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-4">
+                                {Object.entries(colors).map(([key, value]) => (
+                                    <div key={key}>
+                                        <Label
+                                            htmlFor={key}
+                                            className="capitalize mb-2"
+                                        >
+                                            {key} Color
+                                        </Label>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <div className="flex items-center gap-2">
+                                                    <div
+                                                        className="w-8 h-8 rounded-md border cursor-pointer"
+                                                        style={{
+                                                            backgroundColor:
+                                                                value,
+                                                        }}
+                                                    />
+                                                    <Input
+                                                        id={key}
+                                                        value={value}
+                                                        onChange={(e) =>
+                                                            handleColorChange(
+                                                                key as keyof typeof colors,
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                        className="w-full"
+                                                    />
+                                                </div>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-fit p-0">
                                                 <Input
-                                                    id={key}
+                                                    type="color"
                                                     value={value}
                                                     onChange={(e) =>
                                                         handleColorChange(
@@ -232,49 +162,188 @@ export function ReceiptContent() {
                                                             e.target.value
                                                         )
                                                     }
-                                                    className="w-full"
+                                                    className="border-0 p-0 h-64 w-64 cursor-pointer"
                                                 />
-                                            </div>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-fit p-0">
-                                            <Input
-                                                type="color"
-                                                value={value}
-                                                onChange={(e) =>
-                                                    handleColorChange(
-                                                        key as keyof typeof colors,
-                                                        e.target.value
-                                                    )
-                                                }
-                                                className="border-0 p-0 h-64 w-64 cursor-pointer"
-                                            />
-                                        </PopoverContent>
-                                    </Popover>
-                                </div>
-                            ))}
+                                            </PopoverContent>
+                                        </Popover>
+                                    </div>
+                                ))}
+                            </div>
+                            <Button
+                                onClick={downloadImage}
+                                size="lg"
+                                className="w-full md:w-auto"
+                            >
+                                Download
+                            </Button>
+                        </CardContent>
+                    </Card>
+                    <div className="mb-4">
+                        <h2 className="text-xl font-semibold mb-2">Preview</h2>
+                        <div className="border-2 border-dashed p-4 rounded-lg overflow-x-auto">
+                            <ReceiptPreview
+                                colors={colors}
+                                candidates={filteredCandidates}
+                                ref={surveyRef}
+                            />
                         </div>
-                        <Button
-                            onClick={downloadImage}
-                            size="lg"
-                            className="w-full md:w-auto"
-                        >
-                            Download as Image (1080px)
-                        </Button>
-                    </CardContent>
-                </Card>
-
-                {/* Preview Section */}
-                <div className="mb-4">
-                    <h2 className="text-xl font-semibold mb-2">Preview</h2>
-                    <div className="border-2 border-dashed p-4 rounded-lg">
-                        <ReceiptPreview
-                            colors={colors}
-                            candidates={candidates}
-                            ref={surveyRef}
-                        />
                     </div>
                 </div>
-            </div>
+            )}
         </div>
     )
 }
+
+// eslint-disable-next-line react/display-name
+const ReceiptPreview = React.forwardRef<
+    HTMLDivElement,
+    {
+        colors: {
+            text: string
+            bg: string
+        }
+        candidates: Candidate[]
+    }
+>(({ colors, candidates }, ref) => (
+    <div
+        ref={ref}
+        className="receipt-preview min-w-[1080px] overflow-x-auto space-y-10"
+        style={{
+            backgroundColor: colors.bg,
+            color: colors.text,
+            fontFamily: "'Poppins', sans-serif",
+            width: '100%',
+            boxSizing: 'border-box',
+            padding: '2rem',
+        }}
+    >
+        <div className="flex justify-between items-center mb-10">
+            <div
+                className="flex items-center space-x-2"
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                }}
+            >
+                <Image
+                    width={50}
+                    height={50}
+                    alt="Republika ng Pilipinas"
+                    src="/logo/republika-ng-pilipinas.png"
+                />
+                <p
+                    className="text-xl"
+                    style={{
+                        color: colors.text,
+                        fontWeight: 'bold',
+                    }}
+                >
+                    iBoto Mock Election
+                </p>
+            </div>
+
+            <h2
+                style={{
+                    color: colors.text,
+                    fontSize: '30px',
+                    lineHeight: '1.2',
+                    fontWeight: 'bolder',
+                }}
+            >
+                iBoto
+            </h2>
+        </div>
+
+        <div>
+            <div className="flex justify-center mb-10">
+                <h1
+                    style={{
+                        color: colors.text,
+                        fontSize: '40px',
+                        lineHeight: '1.2',
+                        fontWeight: 'bold',
+                    }}
+                >
+                    My 2025 Senatorial Picks
+                </h1>
+            </div>
+
+            <div
+                className="grid grid-cols-2 gap-8 mb-10"
+                style={{ fontSize: '18px' }}
+            >
+                {candidates.map((candidate: Candidate, index: number) => {
+                    const order = index + 1
+                    return (
+                        <div
+                            key={candidate.placement}
+                            className="flex items-center justify-between gap-4"
+                        >
+                            <div className="flex items-center space-x-3">
+                                <CandidateAvatar candidate={candidate} />
+                                <div className="flex items-center justify-center space-x-3">
+                                    <div
+                                        className="font-bold text-5xl"
+                                        style={{
+                                            color:
+                                                order <= 3
+                                                    ? colors.text
+                                                    : colors.text,
+                                        }}
+                                    >
+                                        {order}.
+                                    </div>
+                                    <div className="flex flex-col items-start justify-center">
+                                        <p
+                                            className="text-2xl font-bold leading-none"
+                                            style={{
+                                                color: colors.text,
+                                                marginBottom: 0,
+                                            }}
+                                        >
+                                            {candidate.name}
+                                        </p>
+                                        <p className="text-muted-foreground">
+                                            {candidate.party}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                })}
+            </div>
+
+            <div className="mb-15">
+                <p
+                    className="text-center text-muted-foreground italic"
+                    style={{
+                        fontSize: '16px',
+                    }}
+                >
+                    The image above shows the results of the 2025 Senatorial
+                    Mock Election based on user votes submitted through
+                    www.iboto.vercel.app. iBoto is a decentralized and
+                    transparent platform created to simulate the voting process
+                    and encourage civic engagement through technology. While
+                    these results are not official, they reflect the preferences
+                    of participants who took part in the mock election.
+                </p>
+            </div>
+
+            <div>
+                <p
+                    className="text-center"
+                    style={{
+                        fontSize: '16px',
+                        color: colors.text,
+                        fontWeight: 'bold',
+                        letterSpacing: 1,
+                    }}
+                >
+                    https://iboto.vercel.app
+                </p>
+            </div>
+        </div>
+    </div>
+))

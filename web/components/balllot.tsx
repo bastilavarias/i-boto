@@ -86,13 +86,16 @@ export function Ballot({ isPublic = false }: BallotProps) {
             throw new Error('Vote at least 1 - 12 candidate/s')
         }
         setIsSubmitting(true)
-        setIsReceiptDialog(true)
-        // const result = await voteStore.submit(selectedCandidates)
-        // if (result?.ok) {
-        //     toast.success('Congratulations! Your ballot successfully recorded.')
-        // } else {
-        //     toast.error('Vote submission failed. Please try again later.')
-        // }
+        const result = await voteStore.submit(selectedCandidates)
+        if (result?.ok) {
+            toast.success('Congratulations! Your ballot successfully recorded.')
+            localStorage.setItem(
+                'candidates',
+                JSON.stringify(selectedCandidates)
+            )
+        } else {
+            toast.error('Vote submission failed. Please try again later.')
+        }
         setIsSubmitting(false)
     }
 
@@ -228,22 +231,6 @@ export function Ballot({ isPublic = false }: BallotProps) {
                     )}
                 </div>
             </div>
-
-            <Dialog open={isReceiptDialog} onOpenChange={setIsReceiptDialog}>
-                <DialogContent className="bg-white">
-                    <DialogHeader>
-                        <DialogTitle>Edit profile</DialogTitle>
-                        <DialogDescription>
-                            Make changes to your profile here. Click save when
-                            you're done.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <ReceiptContent />
-                    <DialogFooter>
-                        <Button type="submit">Save changes</Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
         </div>
     )
 }

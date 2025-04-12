@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import {
     Card,
@@ -21,6 +21,13 @@ export function DashboardContent() {
     const [totalVotes, setTotalVotes] = useState(0)
     const [voterParticipation, setVoterParticipation] = useState(0)
     const [authUser, setAuthUser] = useState(null)
+
+    const alreadyVoted = useMemo(() => {
+        const candidates =
+            JSON.parse(localStorage.getItem('candidates') as string) || []
+
+        return candidates.length
+    }, [])
 
     useEffect(() => {
         if (user) {
@@ -55,20 +62,28 @@ export function DashboardContent() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">
-                            {hasVoted ? 'Completed' : 'Not Voted'}
+                            {alreadyVoted ? 'Completed' : 'Not Voted'}
                         </div>
                         <p className="text-xs text-gray-500 mt-1">
-                            {hasVoted
+                            {alreadyVoted
                                 ? 'You have submitted your ballot'
                                 : "You haven't cast your vote yet"}
                         </p>
                         <div className="mt-4">
                             <Button
                                 asChild
-                                variant={hasVoted ? 'outline' : 'default'}
+                                variant={alreadyVoted ? 'outline' : 'default'}
                             >
-                                <Link href="/dashboard/vote">
-                                    {hasVoted ? 'View Your Ballot' : 'Vote Now'}
+                                <Link
+                                    href={
+                                        alreadyVoted
+                                            ? '/dashboard/receipt'
+                                            : '/dashboard/vote'
+                                    }
+                                >
+                                    {alreadyVoted
+                                        ? 'View Your Ballot'
+                                        : 'Vote Now'}
                                 </Link>
                             </Button>
                         </div>
