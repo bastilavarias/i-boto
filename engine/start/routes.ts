@@ -12,6 +12,7 @@ import { middleware } from '#start/kernel'
 const AuthController = () => import('#controllers/auth_controller')
 const VoteController = () => import('#controllers/vote_controller')
 const CandidateController = () => import('#controllers/candidate_controller')
+const ReceiptController = () => import('#controllers/receipt_controller')
 
 router
   .group(() => {
@@ -33,5 +34,11 @@ router
       })
       .use([middleware.firebaseAuth()])
       .prefix('/vote')
+
+    router
+      .group(() => {
+        router.get('/', [ReceiptController, 'generate'])
+      })
+      .prefix('/receipt')
   })
   .prefix('/api')
