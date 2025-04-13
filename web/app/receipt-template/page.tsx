@@ -1,10 +1,10 @@
 import { MainLayout } from '@/layouts/main-layout'
-import { DashboardReceiptContent } from '@/components/dashboard-receipt-content'
+import { VoteReceipt } from '@/components/vote-receipt'
 
 export default function ReceiptPage() {
     return (
         <MainLayout>
-            <DashboardReceiptContent />
+            <VoteReceipt codes={[]} />
         </MainLayout>
     )
 }

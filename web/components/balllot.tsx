@@ -11,15 +11,7 @@ import { candidates } from '@/data'
 import { useVoteStore } from '@/stores/useVoteStore'
 import { CandidateAvatar } from '@/components/candidate-avatar'
 import { toast } from 'sonner'
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog'
-import { ReceiptContent } from '@/components/receipt-content'
+import { useRouter } from 'next/navigation'
 
 interface BallotProps {
     isPublic?: boolean
@@ -32,8 +24,8 @@ export function Ballot({ isPublic = false }: BallotProps) {
     const [showWarning, setShowWarning] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [searchTerm, setSearchTerm] = useState('')
-    const [isReceiptDialog, setIsReceiptDialog] = useState(false)
 
+    const router = useRouter()
     const voteStore = useVoteStore()
 
     const SubmitButton = () => {
@@ -93,6 +85,8 @@ export function Ballot({ isPublic = false }: BallotProps) {
                 'candidates',
                 JSON.stringify(selectedCandidates)
             )
+            router.push('/dashboard/receipt')
+            return
         } else {
             toast.error('Vote submission failed. Please try again later.')
         }

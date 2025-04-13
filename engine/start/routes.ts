@@ -37,7 +37,7 @@ router
 
     router
       .group(() => {
-        router.get('/', [ReceiptController, 'generate'])
+        router.post('/', [ReceiptController, 'generate'])
       })
       .prefix('/receipt')
   })

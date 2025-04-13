@@ -1,19 +1,21 @@
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Candidate } from '@/type'
 import Image from 'next/image'
+import { cn } from '@/lib/utils'
 
-export function CandidateAvatar({
-    candidate,
-}: {
+interface CandidateAvatarProps {
     candidate: Candidate
     options: {
-        size: number
+        size?: number
+        className?: string
     }
-}) {
+}
+
+export function CandidateAvatar({ candidate, options }: CandidateAvatarProps) {
     const source = `/images/candidates/2025/senate/${candidate.code}.png`
 
     return (
-        <Avatar className="h-25 w-25">
+        <Avatar className={cn('h-25 w-25', options.className)}>
             <AvatarImage asChild src={source}>
                 <Image
                     src={source}
