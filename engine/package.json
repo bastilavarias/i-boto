@@ -63,6 +63,7 @@
     "luxon": "^3.6.1",
     "merkletreejs": "^0.5.1",
     "mysql2": "^3.14.0",
+    "puppeteer": "^24.6.1",
     "reflect-metadata": "^0.2.2"
   },
   "hotHook": {

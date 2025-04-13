@@ -73,11 +73,13 @@ export function MainLayout({ children }: MainLayoutProps) {
         '/dashboard',
         '/dashboard/vote',
         '/dashboard/results',
+        '/dashboard/receipt',
     ]
     const isPublicRoute = publicRoutes.includes(pathname)
     const isPrivateRoute = privateRoutes.some((route) =>
         pathname.startsWith(route)
     )
+    const isTemplateRoute = pathname.startsWith('/receipt-template')
 
     useEffect(() => {
         if (isPrivateRoute) {
@@ -91,11 +93,14 @@ export function MainLayout({ children }: MainLayoutProps) {
         if (!finishedAuth) {
             return
         }
+        if (isTemplateRoute) {
+            setBooted(true)
+            return
+        }
         if (!isAuthenticated && isPrivateRoute) {
             return router.push('/login')
         } else if (isAuthenticated && isPublicRoute) {
             return router.push('/dashboard')
-        } else {
         }
         setBooted(true)
     }, [finishedAuth, isAuthenticated, pathname, privateRoutes, router])
