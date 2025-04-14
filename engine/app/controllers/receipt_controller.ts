@@ -11,7 +11,6 @@ export default class ReceiptController {
 
     try {
       const base64image = await this.receiptService.generate(codes)
-      await this.receiptService.close()
 
       return response.status(200).send({
         message: 'Receipt generated successfully',
@@ -21,7 +20,6 @@ export default class ReceiptController {
         },
       })
     } catch (error) {
-      await this.receiptService.close()
       return response.status(500).send({ error: error.message })
     }
   }
