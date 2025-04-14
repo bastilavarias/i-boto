@@ -2,16 +2,9 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
-import { Vote, BarChart3, Users } from 'lucide-react'
+import { Vote, BarChart3 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { User } from 'firebase/auth'
 
@@ -19,7 +12,6 @@ export function DashboardContent() {
     const { user, logout } = useAuth()
 
     const [totalVotes] = useState(0)
-    const [voterParticipation] = useState(0)
     const [authUser, setAuthUser] = useState<User | null>(null)
 
     const alreadyVoted = useMemo(() => {
@@ -27,7 +19,7 @@ export function DashboardContent() {
             JSON.parse(localStorage.getItem('candidates') as string) || []
 
         return candidates.length
-    }, [])
+    }, [localStorage])
 
     useEffect(() => {
         if (user) {

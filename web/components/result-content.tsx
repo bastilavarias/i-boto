@@ -8,8 +8,6 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card'
-import { Clock, Clock4 } from 'lucide-react'
-import { format, parseISO } from 'date-fns'
 import { Candidate } from '@/type'
 import { CandidateAvatar } from '@/components/candidate-avatar'
 import { cn, truncate } from '@/lib/utils'
@@ -18,15 +16,8 @@ import { getCandidatesRepository } from '@/lib/repository/candidate'
 import { Button } from '@/components/ui/button'
 
 export function ResultContent() {
-    const COLORS = {
-        yellow: '#FCD116',
-        blue: '#22229c',
-        red: '#781d47',
-    }
-
     const [leadingCandidates, setLeadingCandidates] = useState<Candidate[]>([])
     const [isLoading, setIsLoading] = useState(true)
-    const [lastUpdated] = useState<string | null>(null)
     const [maxVote, setMaxVote] = useState(0)
 
     const [allCandidates, setAllCandidates] = useState<Candidate[]>([])
@@ -74,21 +65,6 @@ export function ResultContent() {
         setIsAllCandidatesLoading(false)
     }
 
-    // function formatDate(dateString: string) {
-    //     const now = new Date()
-    //     const past = new Date(dateString)
-    //     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //     // @ts-expect-error
-    //     const diff = Math.floor((now - past) / 1000)
-    //
-    //     if (diff < 60) return `${diff} seconds ago`
-    //     if (diff < 3600) return `${Math.floor(diff / 60)} minutes ago`
-    //     if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`
-    //     if (diff < 604800) return `${Math.floor(diff / 86400)} days ago`
-    //
-    //     return past.toLocaleDateString()
-    // }
-
     useEffect(() => {
         const loadResults = async () => {
             setIsLoading(true)
@@ -102,33 +78,10 @@ export function ResultContent() {
     }, [])
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-2xl font-bold tracking-tight">
-                    Election Results
-                </h1>
-                <p className="text-gray-500 flex items-center">
-                    <Clock4 className="h-5 w-5 mr-1" />
-                    Updated 5 minutes ago...
-                </p>
-            </div>
-
-            {lastUpdated && (
-                <div className="flex items-center gap-2 text-sm text-gray-500">
-                    <Clock className="h-4 w-4" />
-                    <span>
-                        Last updated:{' '}
-                        {format(
-                            parseISO(lastUpdated),
-                            "MMMM d, yyyy 'at' h:mm a"
-                        )}
-                    </span>
-                </div>
-            )}
-
-            <Card className="shadow-none border-0 pt-0 bg-none bg-transparent">
+        <div className="space-y-14">
+            <Card className="shadow-none border-0 bg-none bg-transparent">
                 <CardHeader>
-                    <CardTitle className="text-xl font-bold">
+                    <CardTitle className="text-3xl font-bold">
                         🏆 Magic 12
                     </CardTitle>
                 </CardHeader>
@@ -149,15 +102,18 @@ export function ResultContent() {
                                             {index + 1}
                                         </div>
                                         <div className="flex items-center justify-start pl-32 pr-2 py-4 w-full relative py-2 rounded-l-4xl">
-                                            <div className="overflow-hidden flex flex-col items-start justify-center truncate">
+                                            <div className="overflow-hidden flex flex-col items-start justify-center truncate space-y-1">
                                                 <p className="text-2xl font-bold leading-none">
                                                     {truncate(
                                                         candidate?.name,
                                                         11
                                                     )}
                                                 </p>
-                                                <p className="font-bold text-xl">
-                                                    {candidate?.votes}
+                                                <p className="text-xl">
+                                                    Votes:{' '}
+                                                    <span className="font-bold">
+                                                        {candidate?.votes}
+                                                    </span>
                                                 </p>
                                             </div>
                                             <div className="absolute -top-3.6 -left-2">
@@ -181,9 +137,9 @@ export function ResultContent() {
                 </CardContent>
             </Card>
 
-            <Card className="shadow-none border-0 pt-0 bg-none bg-transparent">
+            <Card className="shadow-none border-0 bg-none bg-transparent">
                 <CardHeader>
-                    <CardTitle className="text-xl font-bold">
+                    <CardTitle className="text-3xl font-bold">
                         🔥 All Candidates
                     </CardTitle>
                 </CardHeader>

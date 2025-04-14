@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import {
     BarChart3,
@@ -77,16 +77,37 @@ export function MainLayout({ children }: MainLayoutProps) {
     )
     const isTemplateRoute = pathname.startsWith('/receipt-template')
 
-    const setNavigations = () => {
-        if (isPrivateRoute) {
-            setNavs(privateNavs)
-        } else if (isPublicRoute) {
-            setNavs(publicNavs)
+    const alreadyVoted = useMemo(() => {
+        if (typeof window !== 'undefined') {
+            const candidates =
+                JSON.parse(localStorage.getItem('candidates') as string) || []
+
+            return candidates.length
         }
+
+        return false
+    }, [])
+
+    const setNavigations = () => {
+        let navs: Navigation[] = []
+        if (isPrivateRoute) {
+            navs = privateNavs
+        } else if (isPublicRoute) {
+            navs = publicNavs
+        }
+
+        setNavs(
+            navs.filter((nav) => {
+                if (nav.href === '/dashboard/vote') {
+                    return !alreadyVoted
+                }
+
+                return true
+            })
+        )
     }
 
     useEffect(() => {
-        setNavigations()
         initializeKeyPair()
     }, [])
 
@@ -105,6 +126,10 @@ export function MainLayout({ children }: MainLayoutProps) {
         }
         setBooted(true)
     }, [finishedAuth, isAuthenticated, pathname, privateRoutes, router])
+
+    useEffect(() => {
+        setNavigations()
+    }, [alreadyVoted])
 
     return (
         <div className="min-h-screen flex flex-col bg-gray-50">
@@ -225,7 +250,7 @@ export function MainLayout({ children }: MainLayoutProps) {
 function LogoLink() {
     return (
         <Link href="/" className="flex items-center gap-2">
-            <span className="text-xl font-bold">iBoto 2025</span>
+            <span className="text-3xl font-bold">iBoto</span>
         </Link>
     )
 }
