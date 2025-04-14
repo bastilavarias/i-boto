@@ -73,11 +73,12 @@ export function VoteReceipt({ dataFrom }: VoteReceiptProps) {
                     candidates.find((candidate) => candidate.code === code) ||
                     null
                 _candidates.push(_candidate)
+            } else {
+                _candidates.push(null)
             }
-            _candidates.push(null)
         }
 
-        return _candidates.filter((candidate) => candidate) // Fix this it should support null
+        return _candidates
     }, [codes])
 
     const Logo = () => (
