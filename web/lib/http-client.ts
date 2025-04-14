@@ -16,123 +16,142 @@ export class HttpError extends Error {
     }
 }
 
-export class HttpClient {
-    private baseUrl: string
+const baseUrl = process.env.NEXT_PUBLIC_API_KEY || 'http://localhost:3333'
 
-    constructor(baseUrl?: string) {
-        this.baseUrl = baseUrl || process.env.API_BASE_URL || ''
+if (!baseUrl) {
+    console.warn('No base URL provided. Using relative paths')
+}
 
-        if (!this.baseUrl) {
-            console.warn('No base URL provided. Using relative paths')
-        }
+async function request<TResponse = unknown, TBody = unknown>(
+    method: HttpMethod,
+    endpoint: string,
+    options: RequestOptions<TBody> = {}
+): Promise<TResponse> {
+    const url = new URL(endpoint, baseUrl)
+
+    if (options.params) {
+        Object.entries(options.params).forEach(([key, value]) => {
+            url.searchParams.append(key, value)
+        })
     }
 
-    private async request<TResponse = unknown, TBody = unknown>(
-        method: HttpMethod,
-        endpoint: string,
-        options: RequestOptions<TBody> = {}
-    ): Promise<TResponse> {
-        // Build URL with query params
-        const url = new URL(endpoint, this.baseUrl)
+    const headers = new Headers({
+        'Content-Type': 'application/json',
+        ...options.headers,
+    })
 
-        if (options.params) {
-            Object.entries(options.params).forEach(([key, value]) => {
-                url.searchParams.append(key, value)
-            })
-        }
+    const config: RequestInit = {
+        method,
+        headers,
+    }
 
-        // Prepare headers
-        const headers = new Headers({
-            'Content-Type': 'application/json',
-            ...options.headers,
-        })
+    if (options.body) {
+        config.body = JSON.stringify(options.body)
+    }
 
-        // Prepare config
-        const config: RequestInit = {
-            method,
-            headers,
-        }
+    try {
+        const response = await fetch(url.toString(), config)
 
-        // Add body if present
-        if (options.body) {
-            config.body = JSON.stringify(options.body)
-        }
-
-        try {
-            const response = await fetch(url.toString(), config)
-
-            if (!response.ok) {
-                let errorMessage = `HTTP error ${response.status}`
-                try {
-                    const errorData = await response.json()
-                    errorMessage = errorData.message || errorMessage
-                } catch {
-                    // Ignore JSON parse errors for error response
-                }
-                throw new HttpError(response.status, errorMessage)
+        if (!response.ok) {
+            let errorMessage = `HTTP error ${response.status}`
+            try {
+                const errorData = await response.json()
+                errorMessage = errorData.message || errorMessage
+            } catch {
+                // ignore
             }
-
-            // Handle empty response
-            if (response.status === 204) {
-                return undefined as unknown as TResponse
-            }
-
-            return response.json() as Promise<TResponse>
-        } catch (error) {
-            if (error instanceof HttpError) {
-                throw error
-            }
-            throw new Error(`Network error: ${(error as Error).message}`)
+            throw new HttpError(response.status, errorMessage)
         }
-    }
 
-    public async get<TResponse = unknown>(
-        endpoint: string,
-        options?: Omit<RequestOptions, 'body'>
-    ): Promise<TResponse> {
-        return this.request<TResponse>('GET', endpoint, options)
-    }
+        if (response.status === 204) {
+            return undefined as unknown as TResponse
+        }
 
-    public async post<TResponse = unknown, TBody = unknown>(
-        endpoint: string,
-        body: TBody,
-        options?: RequestOptions<TBody>
-    ): Promise<TResponse> {
-        return this.request<TResponse, TBody>('POST', endpoint, {
-            ...options,
-            body,
-        })
-    }
-
-    public async put<TResponse = unknown, TBody = unknown>(
-        endpoint: string,
-        body: TBody,
-        options?: RequestOptions<TBody>
-    ): Promise<TResponse> {
-        return this.request<TResponse, TBody>('PUT', endpoint, {
-            ...options,
-            body,
-        })
-    }
-
-    public async patch<TResponse = unknown, TBody = unknown>(
-        endpoint: string,
-        body: TBody,
-        options?: RequestOptions<TBody>
-    ): Promise<TResponse> {
-        return this.request<TResponse, TBody>('PATCH', endpoint, {
-            ...options,
-            body,
-        })
-    }
-
-    public async delete<TResponse = unknown>(
-        endpoint: string,
-        options?: Omit<RequestOptions, 'body'>
-    ): Promise<TResponse> {
-        return this.request<TResponse>('DELETE', endpoint, options)
+        return response.json() as Promise<TResponse>
+    } catch (error) {
+        if (error instanceof HttpError) {
+            throw error
+        }
+        throw new Error(`Network error: ${(error as Error).message}`)
     }
 }
 
-// Default instance with environment variable
-export const http = new HttpClient()
+export const httpClient = {
+    get<TResponse = never>(
+        endpoint: string,
+        options?: Omit<RequestOptions, 'body'>
+    ): Promise<TResponse> {
+        return request<TResponse>('GET', endpoint, options)
+    },
+
+    post<TResponse = unknown, TBody = unknown>(
+        endpoint: string,
+        body: TBody,
+        options?: RequestOptions<TBody>
+    ): Promise<TResponse> {
+        return request<TResponse, TBody>('POST', endpoint, { ...options, body })
+    },
+
+    put<TResponse = unknown, TBody = unknown>(
+        endpoint: string,
+        body: TBody,
+        options?: RequestOptions<TBody>
+    ): Promise<TResponse> {
+        return request<TResponse, TBody>('PUT', endpoint, { ...options, body })
+    },
+
+    patch<TResponse = unknown, TBody = unknown>(
+        endpoint: string,
+        body: TBody,
+        options?: RequestOptions<TBody>
+    ): Promise<TResponse> {
+        return request<TResponse, TBody>('PATCH', endpoint, {
+            ...options,
+            body,
+        })
+    },
+
+    delete<TResponse = unknown>(
+        endpoint: string,
+        options?: Omit<RequestOptions, 'body'>
+    ): Promise<TResponse> {
+        return request<TResponse>('DELETE', endpoint, options)
+    },
+}
+
+export const toQueryString = (obj: Record<string, unknown>) => {
+    return new URLSearchParams(
+        Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, String(v)]))
+    ).toString()
+}
+
+type QueryResponse<T = unknown> = {
+    success: boolean
+    data: T | null
+    message: string | null
+}
+
+type ToQueryResponseFn = {
+    <T = unknown>(
+        success: boolean,
+        data: T | null,
+        message: string | null
+    ): QueryResponse<T>
+
+    success: <T = unknown>(data: T, message?: string | null) => QueryResponse<T>
+    error: (message: string) => QueryResponse<null>
+}
+
+export const toQueryResponse: ToQueryResponseFn = <T = unknown>(
+    success: boolean,
+    data: T | null,
+    message: string | null
+) => ({ success, data, message })
+
+toQueryResponse.success = <T = unknown>(
+    data: T,
+    message: string | null = null
+) => toQueryResponse(true, data, message)
+
+toQueryResponse.error = (message: string) =>
+    toQueryResponse(false, null, message)

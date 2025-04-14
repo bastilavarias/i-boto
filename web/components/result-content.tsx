@@ -2,14 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Input } from '@/components/ui/input'
-import { BarChart, Clock, Clock4, Search } from 'lucide-react'
+import { Clock, Clock4 } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
 import { Candidate } from '@/type'
 import { CandidateAvatar } from '@/components/candidate-avatar'
 import { cn } from '@/lib/utils'
 import { Progress } from '@/components/ui/progress'
+import { getCandidatesRepository } from '@/lib/api/candidate'
 
 export function ResultContent() {
     const [leadingCandidates, setLeadingCandidates] = useState<Candidate[]>([])
@@ -20,12 +19,14 @@ export function ResultContent() {
     const [maxVote, setMaxVote] = useState(0)
 
     const getLeadingCandidates = async () => {
-        const response = await fetch(
-            'http://localhost:3333/api/candidate?page=1&perPage=12&withVotes=1&sortBy=desc'
-        )
-        if (response.ok) {
-            const jsonData = await response.json()
-            const candidates = jsonData.data
+        const result = await getCandidatesRepository({
+            page: 1,
+            perPage: 12,
+            withVotes: 1,
+            sortBy: 'desc',
+        })
+        if (result?.success) {
+            const candidates = result?.data?.data || []
             setLeadingCandidates(candidates)
 
             if (candidates.length) {

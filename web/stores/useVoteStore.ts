@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { httpClient } from '@/lib/http-client'
 
 type VoteState = {
     submit: (codes: string[]) => Promise<unknown>
@@ -41,7 +42,7 @@ export const useVoteStore = create<VoteState>(() => ({
                 String.fromCharCode(...new Uint8Array(exportedPubKey))
             )
 
-            return await fetch('http://localhost:3333/api/vote/', {
+            return await httpClient.post('http://localhost:3333/api/vote/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
