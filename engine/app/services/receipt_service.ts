@@ -7,23 +7,18 @@ export default class ScreenshotService {
     {
       create: async () => {
         return puppeteer.launch({
-          args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage', // Critical for Docker
-            '--single-process', // Reduces memory usage
-          ],
+          args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
           defaultViewport: {
             width: 1920,
-            height: 1920,
-            deviceScaleFactor: 1,
+            height: 3728,
+            deviceScaleFactor: 2,
           },
         })
       },
       destroy: (browser) => browser.close(),
     },
     {
-      max: 5, // Adjust based on server memory (1GB per instance)
+      max: 5,
       min: 1,
       idleTimeoutMillis: 30000,
     }
@@ -39,7 +34,7 @@ export default class ScreenshotService {
 
       await page.goto(url.toString(), {
         waitUntil: 'networkidle0',
-        timeout: 15000, // Fail fast
+        timeout: 15000,
       })
 
       const selector = env.get('RECEIPT_TEMPLATE_SELECTOR')
@@ -54,7 +49,6 @@ export default class ScreenshotService {
         encoding: 'base64',
       })
     } finally {
-      console.log('im released')
       await page.close()
       await ScreenshotService.browserPool.release(browser)
     }

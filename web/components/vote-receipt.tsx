@@ -22,7 +22,7 @@ export function VoteReceipt({ dataFrom }: VoteReceiptProps) {
     const TEXT = {
         logo: {
             main: 'iBoto',
-            subtitle: 'Decentralized Mock Election Platform',
+            subtitle: 'Decentralized Mock Election Website',
         },
         heading: 'I voted for these Senators',
         footer: {
@@ -84,7 +84,7 @@ export function VoteReceipt({ dataFrom }: VoteReceiptProps) {
         <div className="flex flex-col items-center space-y-1">
             <div className="flex items-center justify-center space-x-2">
                 <div className="flex items-center space-x-2">
-                    {[...Array(3)].map((_, i) => (
+                    {[...Array(8)].map((_, i) => (
                         <Star
                             key={`l-${i}`}
                             color={COLORS.yellow}
@@ -96,7 +96,7 @@ export function VoteReceipt({ dataFrom }: VoteReceiptProps) {
                     {TEXT.logo.main}
                 </p>
                 <div className="flex items-center space-x-2">
-                    {[...Array(3)].map((_, i) => (
+                    {[...Array(8)].map((_, i) => (
                         <Star
                             key={`r-${i}`}
                             color={COLORS.yellow}
@@ -105,7 +105,9 @@ export function VoteReceipt({ dataFrom }: VoteReceiptProps) {
                     ))}
                 </div>
             </div>
-            <p className="text-white font-bold text-xl">{TEXT.logo.subtitle}</p>
+            <p className="text-white font-bold text-3xl">
+                {TEXT.logo.subtitle}
+            </p>
         </div>
     )
 

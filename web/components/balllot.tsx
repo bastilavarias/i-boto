@@ -12,6 +12,26 @@ import { CandidateAvatar } from '@/components/candidate-avatar'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { createVoteRepository } from '@/lib/repository/vote'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import {
+    Table,
+    TableBody,
+    TableCaption,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table'
+import { Candidate } from '@/type'
 
 const MAX_SELECTIONS = 12
 
@@ -20,55 +40,28 @@ export function Ballot() {
     const [showWarning, setShowWarning] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [searchQuery, setSearchQuery] = useState('')
+    const [isSubmitAlertDialogOpen, setIsSubmitAlertDialogOpen] =
+        useState(false)
 
     const router = useRouter()
-    const Toolbar = () => {
-        return (
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-center md:gap-4">
-                    <CardTitle className="whitespace-nowrap">
-                        All Candidates
-                    </CardTitle>
-                    <div className="relative">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-                        <Input
-                            type="search"
-                            placeholder="Search candidate"
-                            className="pl-8 w-full"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                    </div>
-                </div>
 
-                {/* Submit Button */}
-                <Button
-                    size="lg"
-                    onClick={submitVotes}
-                    disabled={
-                        selectedCandidates.length === 0 ||
-                        selectedCandidates.length > 12 ||
-                        isSubmitting
-                    }
-                    className="w-full md:w-auto"
-                >
-                    {isSubmitting ? (
-                        <>
-                            <div className="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                            Submitting...
-                        </>
-                    ) : (
-                        'Submit Ballot'
-                    )}
-                </Button>
-            </div>
-        )
-    }
     const filteredCandidates = useMemo(() => {
         return candidates.filter((candidate) =>
             candidate.name.toLowerCase().includes(searchQuery.toLowerCase())
         )
     }, [candidates, searchQuery])
+    const selectedFullCandidates = useMemo(() => {
+        const names: Candidate[] = []
+        selectedCandidates.forEach((code) => {
+            names.push(
+                candidates.find(
+                    (candidate) => candidate.code === code
+                ) as Candidate
+            )
+        })
+
+        return names
+    }, [candidates, selectedCandidates])
 
     const onSelectCandidate = (candidateCode: string) => {
         setSelectedCandidates((prev) => {
@@ -86,6 +79,7 @@ export function Ballot() {
     }
 
     const submitVotes = async () => {
+        setIsSubmitAlertDialogOpen(false)
         if (selectedCandidates.length === 0 || selectedCandidates.length > 12) {
             throw new Error('Vote at least 1 - 12 candidate/s')
         }
@@ -114,6 +108,49 @@ export function Ballot() {
             setShowWarning(false)
         }
     }, [showWarning])
+
+    const Toolbar = () => {
+        return (
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-center md:gap-4">
+                    <CardTitle className="whitespace-nowrap">
+                        All Candidates
+                    </CardTitle>
+                    <div className="relative bg-white">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+                        <Input
+                            type="search"
+                            placeholder="Search candidate"
+                            className="pl-8 w-full"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            autoFocus={true}
+                        />
+                    </div>
+                </div>
+
+                <Button
+                    size="lg"
+                    onClick={() => setIsSubmitAlertDialogOpen(true)}
+                    disabled={
+                        selectedCandidates.length === 0 ||
+                        selectedCandidates.length > 12 ||
+                        isSubmitting
+                    }
+                    className="w-full md:w-auto"
+                >
+                    {isSubmitting ? (
+                        <>
+                            <div className="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                            Submitting...
+                        </>
+                    ) : (
+                        'Submit'
+                    )}
+                </Button>
+            </div>
+        )
+    }
 
     return (
         <div className="space-y-6">
@@ -219,6 +256,46 @@ export function Ballot() {
                     ))}
                 </div>
             </div>
+
+            <AlertDialog open={isSubmitAlertDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Before you submit</AlertDialogTitle>
+                        <Table>
+                            <TableCaption>Your Senators</TableCaption>
+                            <TableHeader>
+                                <TableRow className="text-left">
+                                    <TableHead>Candidate</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {selectedFullCandidates.map(
+                                    (candidate, index: number) => (
+                                        <TableRow
+                                            className="text-left"
+                                            key={candidate.placement}
+                                        >
+                                            <TableCell className="font-medium">
+                                                {index + 1}. {candidate.name}
+                                            </TableCell>
+                                        </TableRow>
+                                    )
+                                )}
+                            </TableBody>
+                        </Table>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel
+                            onClick={() => setIsSubmitAlertDialogOpen(false)}
+                        >
+                            Re-think
+                        </AlertDialogCancel>
+                        <AlertDialogAction onClick={submitVotes}>
+                            Confirm
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     )
 }

@@ -20,6 +20,7 @@ export default class ReceiptController {
         },
       })
     } catch (error) {
+      console.log(error.message)
       return response.status(500).send({ error: error.message })
     }
   }
