@@ -66,7 +66,7 @@ export function VoteReceipt({ dataFrom }: VoteReceiptProps) {
 
     const filteredCandidates = useMemo(() => {
         const _candidates = []
-        for (let i = 0; i < 11; i++) {
+        for (let i = 0; i < 12; i++) {
             const code = codes[i] || null
             if (code) {
                 const _candidate =
@@ -77,7 +77,7 @@ export function VoteReceipt({ dataFrom }: VoteReceiptProps) {
             _candidates.push(null)
         }
 
-        return _candidates
+        return _candidates.filter((candidate) => candidate) // Fix this it should support null
     }, [codes])
 
     const Logo = () => (
