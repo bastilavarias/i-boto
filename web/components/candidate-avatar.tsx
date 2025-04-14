@@ -15,7 +15,7 @@ export function CandidateAvatar({ candidate, options }: CandidateAvatarProps) {
     const source = `/images/candidates/2025/senate/${candidate.code}.png`
 
     return (
-        <Avatar className={cn('h-25 w-25', options?.className)}>
+        <Avatar className={cn(options?.className)}>
             <AvatarImage asChild src={source}>
                 <Image
                     src={source}

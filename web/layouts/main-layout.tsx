@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button'
 import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet'
 import { useAuth } from '@/hooks/useAuth'
 import { Toaster } from '@/components/ui/sonner'
+import { initializeKeyPair } from '@/lib/crypto/keypair'
 
 interface MainLayoutProps {
     children: React.ReactNode
@@ -33,11 +34,6 @@ const publicNavs: Navigation[] = [
         name: 'Login',
         href: '/login',
         icon: LogIn,
-    },
-    {
-        name: 'Results',
-        href: '/results',
-        icon: BarChart3,
     },
 ]
 const privateNavs: Navigation[] = [
@@ -81,12 +77,17 @@ export function MainLayout({ children }: MainLayoutProps) {
     )
     const isTemplateRoute = pathname.startsWith('/receipt-template')
 
-    useEffect(() => {
+    const setNavigations = () => {
         if (isPrivateRoute) {
             setNavs(privateNavs)
         } else if (isPublicRoute) {
             setNavs(publicNavs)
         }
+    }
+
+    useEffect(() => {
+        setNavigations()
+        initializeKeyPair()
     }, [])
 
     useEffect(() => {

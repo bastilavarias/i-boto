@@ -1,4 +1,5 @@
-import puppeteer, { Browser, Page, ScreenshotOptions } from 'puppeteer'
+import puppeteer, { Browser, Page } from 'puppeteer'
+import env from '#start/env'
 
 export default class ScreenshotService {
   private browser: Browser | null = null
@@ -17,39 +18,25 @@ export default class ScreenshotService {
     this.page = await this.browser.newPage()
   }
 
-  public async generate(
-    url: string,
-    options: {
-      selector?: string
-      outputPath?: string
-      screenshotOptions?: ScreenshotOptions
-    } = {}
-  ): Promise<Uint8Array<ArrayBufferLike>> {
+  public async generate(codes: string[]): Promise<string> {
     if (!this.page) {
       await this.initialize()
     }
-    await this.page!.goto(url, { waitUntil: 'networkidle0' })
-    if (options.selector) {
-      await this.page!.waitForSelector(options.selector)
-      const element = await this.page!.$(options.selector)
-      if (!element) {
-        throw new Error(`Selector ${options.selector} not found`)
-      }
-
-      return await element.screenshot({
-        path: options.outputPath,
-        omitBackground: true,
-        ...options.screenshotOptions,
-      })
+    const url = new URL(`${env.get('WEB_CLIENT_DOMAIN')}/receipt-template`)
+    url.searchParams.append('codes', codes.join(','))
+    await this.page!.goto(url.toString(), {
+      waitUntil: 'networkidle0',
+    })
+    await this.page!.waitForSelector(env.get('RECEIPT_TEMPLATE_SELECTOR'))
+    const element = await this.page!.$(env.get('RECEIPT_TEMPLATE_SELECTOR'))
+    if (!element) {
+      throw new Error(`Selector ${env.get('RECEIPT_TEMPLATE_SELECTOR')} not found`)
     }
 
-    const screenshot = await this.page!.screenshot({
-      path: options.outputPath,
-      fullPage: true,
-      ...options.screenshotOptions,
+    return await element.screenshot({
+      omitBackground: true,
+      encoding: 'base64',
     })
-
-    return screenshot
   }
 
   public async close() {

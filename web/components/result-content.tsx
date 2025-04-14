@@ -8,14 +8,12 @@ import { Candidate } from '@/type'
 import { CandidateAvatar } from '@/components/candidate-avatar'
 import { cn } from '@/lib/utils'
 import { Progress } from '@/components/ui/progress'
-import { getCandidatesRepository } from '@/lib/api/candidate'
+import { getCandidatesRepository } from '@/lib/repository/candidate'
 
 export function ResultContent() {
     const [leadingCandidates, setLeadingCandidates] = useState<Candidate[]>([])
-    const [candidates, setCandidates] = useState<Candidate[]>([])
-    const [searchTerm, setSearchTerm] = useState('')
     const [loading, setLoading] = useState(true)
-    const [lastUpdated, setLastUpdated] = useState<string | null>(null)
+    const [lastUpdated] = useState<string | null>(null)
     const [maxVote, setMaxVote] = useState(0)
 
     const getLeadingCandidates = async () => {
@@ -26,6 +24,8 @@ export function ResultContent() {
             sortBy: 'desc',
         })
         if (result?.success) {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            //@ts-expect-error
             const candidates = result?.data?.data || []
             setLeadingCandidates(candidates)
 
@@ -33,24 +33,22 @@ export function ResultContent() {
                 setMaxVote(candidates[0].votes)
             }
         }
-
-        setCandidates([])
     }
 
-    function formatDate(dateString: string) {
-        const now = new Date()
-        const past = new Date(dateString)
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error
-        const diff = Math.floor((now - past) / 1000)
-
-        if (diff < 60) return `${diff} seconds ago`
-        if (diff < 3600) return `${Math.floor(diff / 60)} minutes ago`
-        if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`
-        if (diff < 604800) return `${Math.floor(diff / 86400)} days ago`
-
-        return past.toLocaleDateString()
-    }
+    // function formatDate(dateString: string) {
+    //     const now = new Date()
+    //     const past = new Date(dateString)
+    //     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //     // @ts-expect-error
+    //     const diff = Math.floor((now - past) / 1000)
+    //
+    //     if (diff < 60) return `${diff} seconds ago`
+    //     if (diff < 3600) return `${Math.floor(diff / 60)} minutes ago`
+    //     if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`
+    //     if (diff < 604800) return `${Math.floor(diff / 86400)} days ago`
+    //
+    //     return past.toLocaleDateString()
+    // }
 
     useEffect(() => {
         const loadResults = async () => {
@@ -119,6 +117,9 @@ export function ResultContent() {
                                     <div className="flex items-center gap-2 flex-1  h-full">
                                         <CandidateAvatar
                                             candidate={candidate}
+                                            options={{
+                                                className: 'w-24 h-24',
+                                            }}
                                         />
                                         <div className="space-y-2 w-full flex flex-col h-full">
                                             <div className="flex items-center gap-3 flex-1">
@@ -189,6 +190,9 @@ export function ResultContent() {
                                     <div className="flex items-center gap-2 flex-1  h-full">
                                         <CandidateAvatar
                                             candidate={candidate}
+                                            options={{
+                                                className: 'w-24 h-24',
+                                            }}
                                         />
                                         <div className="space-y-2 w-full flex flex-col h-full">
                                             <div className="flex items-center gap-3 flex-1">

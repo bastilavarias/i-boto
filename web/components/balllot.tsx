@@ -8,55 +8,67 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { candidates } from '@/data'
-import { useVoteStore } from '@/stores/useVoteStore'
 import { CandidateAvatar } from '@/components/candidate-avatar'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
-
-interface BallotProps {
-    isPublic?: boolean
-}
+import { createVoteRepository } from '@/lib/repository/vote'
 
 const MAX_SELECTIONS = 12
 
-export function Ballot({ isPublic = false }: BallotProps) {
+export function Ballot() {
     const [selectedCandidates, setSelectedCandidates] = useState<string[]>([])
     const [showWarning, setShowWarning] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [searchTerm, setSearchTerm] = useState('')
+    const [searchQuery, setSearchQuery] = useState('')
 
     const router = useRouter()
-    const voteStore = useVoteStore()
-
-    const SubmitButton = () => {
+    const Toolbar = () => {
         return (
-            <Button
-                size="lg"
-                onClick={submitVotes}
-                disabled={
-                    selectedCandidates.length === 0 ||
-                    selectedCandidates.length > 12 ||
-                    isSubmitting
-                }
-                className="px-8"
-            >
-                {isSubmitting ? (
-                    <>
-                        <div className="border-2 border-white border-t-transparent rounded-full w-5 h-5 animate-spin mr-2"></div>
-                        Submitting...
-                    </>
-                ) : (
-                    'Submit Ballot'
-                )}
-            </Button>
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-center md:gap-4">
+                    <CardTitle className="whitespace-nowrap">
+                        All Candidates
+                    </CardTitle>
+                    <div className="relative">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+                        <Input
+                            type="search"
+                            placeholder="Search candidate"
+                            className="pl-8 w-full"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                </div>
+
+                {/* Submit Button */}
+                <Button
+                    size="lg"
+                    onClick={submitVotes}
+                    disabled={
+                        selectedCandidates.length === 0 ||
+                        selectedCandidates.length > 12 ||
+                        isSubmitting
+                    }
+                    className="w-full md:w-auto"
+                >
+                    {isSubmitting ? (
+                        <>
+                            <div className="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                            Submitting...
+                        </>
+                    ) : (
+                        'Submit Ballot'
+                    )}
+                </Button>
+            </div>
         )
     }
-
     const filteredCandidates = useMemo(() => {
         return candidates.filter((candidate) =>
-            candidate.name.toLowerCase().includes(searchTerm.toLowerCase())
+            candidate.name.toLowerCase().includes(searchQuery.toLowerCase())
         )
-    }, [candidates, searchTerm])
+    }, [candidates, searchQuery])
 
     const onSelectCandidate = (candidateCode: string) => {
         setSelectedCandidates((prev) => {
@@ -78,8 +90,8 @@ export function Ballot({ isPublic = false }: BallotProps) {
             throw new Error('Vote at least 1 - 12 candidate/s')
         }
         setIsSubmitting(true)
-        const result = await voteStore.submit(selectedCandidates)
-        if (result?.ok) {
+        const result = await createVoteRepository(selectedCandidates)
+        if (result?.success) {
             toast.success('Congratulations! Your ballot successfully recorded.')
             localStorage.setItem(
                 'candidates',
@@ -88,7 +100,10 @@ export function Ballot({ isPublic = false }: BallotProps) {
             router.push('/dashboard/receipt')
             return
         } else {
-            toast.error('Vote submission failed. Please try again later.')
+            toast.error(
+                result.message ||
+                    'Vote submission failed. Please try again later.'
+            )
         }
         setIsSubmitting(false)
     }
@@ -144,8 +159,8 @@ export function Ballot({ isPublic = false }: BallotProps) {
                 </CardContent>
             </Card>
 
-            <div className="space-y-4">
-                <Card className="sticky left-0 top-[6.5%] z-10 rounded-none shadow-none pt-0">
+            <div className="space-y-8">
+                <Card className="sticky left-0 top-[6.5%] z-10 rounded-none shadow-none py-0">
                     <div className="bg-green-100 text-center p-2 flex-col justify-between">
                         <div className="" />
                         <p className="font-bold text-green-800">
@@ -157,27 +172,9 @@ export function Ballot({ isPublic = false }: BallotProps) {
                             {MAX_SELECTIONS}
                         </p>
                     </div>
-                    <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                        <div className="flex items-center space-x-2">
-                            <CardTitle>All Candidates</CardTitle>
-                            <div className="relative">
-                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-                                <Input
-                                    type="search"
-                                    placeholder="Search candidate"
-                                    className="pl-8 w-full sm:w-64"
-                                    value={searchTerm}
-                                    onChange={(e) =>
-                                        setSearchTerm(e.target.value)
-                                    }
-                                />
-                            </div>
-                        </div>
-                        <div>
-                            <SubmitButton />
-                        </div>
-                    </CardHeader>
                 </Card>
+
+                <Toolbar />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {filteredCandidates.map((candidate) => (
@@ -212,17 +209,14 @@ export function Ballot({ isPublic = false }: BallotProps) {
                                     </p>
                                 </div>
                             </div>
-                            <CandidateAvatar candidate={candidate} />
+                            <CandidateAvatar
+                                candidate={candidate}
+                                options={{
+                                    className: 'w-24 h-24',
+                                }}
+                            />
                         </div>
                     ))}
-                </div>
-
-                <div className="justify-center">
-                    {!isPublic && (
-                        <div className="w-full py-6 flex justify-center">
-                            <SubmitButton />
-                        </div>
-                    )}
                 </div>
             </div>
         </div>

@@ -69,11 +69,15 @@ export function useAuth(): UseAuthReturn {
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    //@ts-expect-error
                     body: JSON.stringify({ token: user?.accessToken }),
                     credentials: 'include',
                 }
             )
             if (!result.ok) {
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                //@ts-expect-error
                 throw new Error(result.message)
             }
             setIsAuthenticated(true)

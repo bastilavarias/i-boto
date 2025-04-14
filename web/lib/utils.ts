@@ -13,7 +13,7 @@ export const truncate = (
         trim?: boolean
     } = {}
 ): string => {
-    const { ellipsis = '...', trim = true } = options
+    const { ellipsis = '..', trim = true } = options
     if (!text) return text
     const processedText = trim ? text.trim() : text
     if (processedText.length <= limit) return processedText

@@ -7,14 +7,19 @@ export default class ReceiptController {
   constructor(private receiptService: ReceiptService) {}
 
   public async generate({ request, response }: HttpContext) {
-    const { url, selector } = request.only(['url', 'selector'])
+    const { codes } = request.only(['codes'])
 
     try {
-      const buffer = await this.receiptService.generate(url, { selector })
+      const base64image = await this.receiptService.generate(codes)
       await this.receiptService.close()
 
-      response.header('Content-Type', 'image/png')
-      return response.send(buffer)
+      return response.status(200).send({
+        message: 'Receipt generated successfully',
+        data: {
+          image: base64image,
+          mimeType: 'image/png',
+        },
+      })
     } catch (error) {
       await this.receiptService.close()
       return response.status(500).send({ error: error.message })

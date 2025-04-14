@@ -1,18 +1,21 @@
-import React, { useMemo } from 'react'
+'use client'
+
+import React, { useEffect, useMemo, useState } from 'react'
 import { Star } from 'lucide-react'
 import { truncate } from '@/lib/utils'
 import { CandidateAvatar } from '@/components/candidate-avatar'
 import { candidates } from '@/data'
 import { Candidate } from '@/type'
 import Image from 'next/image'
+import { useSearchParams } from 'next/navigation'
 
 interface VoteReceiptProps {
-    codes: string[]
+    dataFrom: 'url' | 'storage'
 }
 
-export function VoteReceipt({ codes }: VoteReceiptProps) {
+export function VoteReceipt({ dataFrom }: VoteReceiptProps) {
     const COLORS = {
-        yellow: '#ecbe26',
+        yellow: '#FCD116',
         blue: '#22229c',
         red: '#781d47',
     }
@@ -29,16 +32,53 @@ export function VoteReceipt({ codes }: VoteReceiptProps) {
                         speaks for you, not over you.”`,
         },
     }
+    const searchParams = useSearchParams()
+    const [codes, setCodes] = useState([])
 
-    const filteredCandidates = useMemo(
-        () =>
-            codes
-                .map((code: string) =>
-                    candidates.find((_c) => _c.code === code)
-                )
-                .filter(Boolean),
-        [codes]
-    )
+    useEffect(() => {
+        if (typeof window === 'undefined') return
+
+        if (dataFrom === 'url') {
+            // Get codes from URL query parameters
+            const urlCodes = searchParams?.get('codes')
+            if (urlCodes) {
+                const parsedCodes = urlCodes.split(',')
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-expect-error
+                setCodes(parsedCodes)
+            }
+        } else if (dataFrom === 'storage') {
+            const storedCodes = localStorage.getItem('candidates')
+            if (storedCodes) {
+                try {
+                    const parsedCodes = JSON.parse(storedCodes)
+                    if (Array.isArray(parsedCodes)) {
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-expect-error
+                        setCodes(parsedCodes)
+                    }
+                } catch (error) {
+                    console.error('Failed to parse stored candidates', error)
+                }
+            }
+        }
+    }, [dataFrom, searchParams])
+
+    const filteredCandidates = useMemo(() => {
+        const _candidates = []
+        for (let i = 0; i < 11; i++) {
+            const code = codes[i] || null
+            if (code) {
+                const _candidate =
+                    candidates.find((candidate) => candidate.code === code) ||
+                    null
+                _candidates.push(_candidate)
+            }
+            _candidates.push(null)
+        }
+
+        return _candidates
+    }, [codes])
 
     const Logo = () => (
         <div className="flex flex-col items-center space-y-1">
@@ -72,7 +112,7 @@ export function VoteReceipt({ codes }: VoteReceiptProps) {
     return (
         <div
             id="receipt-template"
-            className={`min-w-[1080px] p-10 space-y-15 font-['Poppins'] w-full box-border`}
+            className={`min-w-[1080px] p-10 space-y-32 font-['Poppins'] w-full box-border`}
             style={{
                 background: `url('/images/philippines-map.png'), linear-gradient(to bottom, ${COLORS.blue}, ${COLORS.red})`,
                 backgroundRepeat: 'no-repeat',
@@ -81,69 +121,90 @@ export function VoteReceipt({ codes }: VoteReceiptProps) {
                 backgroundSize: 'auto 110%',
             }}
         >
-            <Logo />
-            <div className="flex flex-col items-center">
-                <p className="text-white text-6xl font-bold">{TEXT.heading}</p>
-            </div>
-            <div className="grid grid-cols-2 gap-20">
-                {filteredCandidates.map(
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                    // @ts-expect-error
-                    (candidate: Candidate, index: number) => {
-                        return (
-                            <div
-                                key={candidate?.placement}
-                                className="flex items-center justify-between gap-4"
-                            >
-                                {candidate && (
+            <div className="space-y-20">
+                <Logo />
+                <div className="flex flex-col items-center">
+                    <p className="text-white text-6xl font-bold">
+                        {TEXT.heading}
+                    </p>
+                </div>
+                <div className="grid grid-cols-2 gap-20">
+                    {filteredCandidates.map(
+                        (candidate: Candidate | null, index: number) => {
+                            return (
+                                <div
+                                    key={index}
+                                    className="flex items-center justify-between gap-4"
+                                >
                                     <div className="flex items-center space-x-5 w-full">
-                                        <div className="font-bold text-6xl text-white">
+                                        <div
+                                            className="font-bold text-6xl"
+                                            style={{
+                                                color: candidate
+                                                    ? COLORS.yellow
+                                                    : 'white',
+                                            }}
+                                        >
                                             {index + 1}
                                         </div>
-                                        <div className="flex items-center justify-start pl-32 pr-2 py-4 bg-white w-full relative py-2 rounded-l-4xl rounded-br-4xl">
-                                            <div className="overflow-hidden flex flex-col items-start justify-start truncate">
+                                        <div className="flex items-center justify-start pl-40 pr-2 py-4 bg-white w-full relative py-2 rounded-l-4xl rounded-br-4xl">
+                                            <div className="overflow-hidden flex flex-col items-start justify-center truncate">
                                                 <p
-                                                    className={`text-3xl font-bold leading-none text-[${COLORS.blue}]`}
+                                                    className="text-4xl font-bold leading-none"
+                                                    style={{
+                                                        color: COLORS.blue,
+                                                    }}
                                                 >
                                                     {truncate(
-                                                        candidate.name,
-                                                        15
+                                                        candidate?.name ||
+                                                            'Vacant',
+                                                        11
                                                     )}
                                                 </p>
                                                 <p
-                                                    className={`text-[${COLORS.red}] font-medium`}
+                                                    className="font-medium text-xl"
+                                                    style={{
+                                                        color: COLORS.red,
+                                                    }}
                                                 >
-                                                    {candidate.party}
+                                                    {candidate?.party ||
+                                                        'No candidate selected'}
                                                 </p>
                                             </div>
                                             <div className="absolute -top-3.6 -left-2">
                                                 <div
-                                                    className={`relative rounded-full p-[4px] bg-gradient-to-r from-[${COLORS.blue}] to-[${COLORS.red}]`}
+                                                    className="relative rounded-full p-[4px]"
+                                                    style={{
+                                                        backgroundImage: `linear-gradient(to right, ${COLORS.blue}, ${COLORS.red})`,
+                                                    }}
                                                 >
-                                                    <CandidateAvatar
-                                                        candidate={candidate}
-                                                        options={{
-                                                            size: 100,
-                                                            className:
-                                                                'w-30 h-30',
-                                                        }}
-                                                    />
+                                                    {candidate ? (
+                                                        <CandidateAvatar
+                                                            candidate={
+                                                                candidate
+                                                            }
+                                                            options={{
+                                                                size: 120,
+                                                                className:
+                                                                    'w-36 h-36',
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <div className="w-36 h-36 rounded-full bg-white" />
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                )}
-                            </div>
-                        )
-                    }
-                )}
+                                </div>
+                            )
+                        }
+                    )}
+                </div>
             </div>
             <div className="flex flex-col justify-center items-center space-y-20">
                 <div className="flex justify-between items-center w-full">
-                    <p
-                        className="text-8xl font-bold bg-[url('/images/philippine-flag.png')] bg-cover bg-center bg-clip-text text-transparent
-            drop-shadow-[0_1px_1px_rgba(255,255,255,0.3)]"
-                    >
+                    <p className="text-8xl font-bold bg-[url('/images/philippine-flag.png')] bg-cover bg-center bg-clip-text text-transparent">
                         {TEXT.footer.hashtag}
                     </p>
                     <div className="flex flex-col justify-center items-center space-y-5">

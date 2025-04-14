@@ -19,6 +19,6 @@ export const getCandidatesRepository = async (
     } catch (error) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         //@ts-expect-error
-        toQueryResponse.error(error?.message)
+        return toQueryResponse.error(error?.message)
     }
 }

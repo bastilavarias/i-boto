@@ -32,7 +32,7 @@ export default await Env.create(new URL('../', import.meta.url), {
   /*
   |----------------------------------------------------------
   | Variables for web3.storage
-  |----------------------------------------------------------
+  |----------------------------------------------------------G
   */
   WEB3_STORAGE_EMAIL: Env.schema.string(),
   WEB3_STORAGE_SPACE: Env.schema.string(),
@@ -64,4 +64,12 @@ export default await Env.create(new URL('../', import.meta.url), {
 |----------------------------------------------------------
 */
   VOTE_TALLY_SIGNATURE_DATA: Env.schema.string(),
+
+  /*
+|----------------------------------------------------------
+| Variables for general purposes
+|----------------------------------------------------------
+*/
+  WEB_CLIENT_DOMAIN: Env.schema.string(),
+  RECEIPT_TEMPLATE_SELECTOR: Env.schema.string(),
 })

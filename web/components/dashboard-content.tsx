@@ -13,14 +13,14 @@ import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Vote, BarChart3, Users } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
+import { User } from 'firebase/auth'
 
 export function DashboardContent() {
     const { user, logout } = useAuth()
 
-    const [hasVoted, setHasVoted] = useState(false)
-    const [totalVotes, setTotalVotes] = useState(0)
-    const [voterParticipation, setVoterParticipation] = useState(0)
-    const [authUser, setAuthUser] = useState(null)
+    const [totalVotes] = useState(0)
+    const [voterParticipation] = useState(0)
+    const [authUser, setAuthUser] = useState<User | null>(null)
 
     const alreadyVoted = useMemo(() => {
         const candidates =
@@ -52,7 +52,7 @@ export function DashboardContent() {
                 )}
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">
@@ -111,76 +111,6 @@ export function DashboardContent() {
                                 </Link>
                             </Button>
                         </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">
-                            Voter Participation
-                        </CardTitle>
-                        <Users className="h-4 w-4 text-gray-500" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">
-                            {voterParticipation}%
-                        </div>
-                        <p className="text-xs text-gray-500 mt-1">
-                            Of registered voters
-                        </p>
-                        <div className="mt-4">
-                            <Progress
-                                value={voterParticipation}
-                                className="h-2"
-                            />
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>How to Vote</CardTitle>
-                        <CardDescription>
-                            Follow these steps to cast your vote in the mock
-                            election
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <ol className="list-decimal list-inside space-y-2">
-                            <li>Navigate to the Vote page using the sidebar</li>
-                            <li>Select up to 12 senatorial candidates</li>
-                            <li>Review your selections carefully</li>
-                            <li>Submit your ballot to record your vote</li>
-                            <li>
-                                View the results page to see the current
-                                standings
-                            </li>
-                        </ol>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle>About This Election</CardTitle>
-                        <CardDescription>
-                            Information about the mock senatorial election
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                        <p>
-                            This is a simulation of the May 12, 2025 National,
-                            Local and BARMM Parliamentary Elections.
-                        </p>
-                        <p>
-                            The mock election allows you to select up to 12
-                            senatorial candidates from a list of 66 candidates.
-                        </p>
-                        <p>
-                            All data is stored locally in your browser and is
-                            for demonstration purposes only.
-                        </p>
                     </CardContent>
                 </Card>
             </div>

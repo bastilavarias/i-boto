@@ -4,7 +4,7 @@ import { VoteReceipt } from '@/components/vote-receipt'
 export default function ReceiptPage() {
     return (
         <MainLayout>
-            <VoteReceipt codes={[]} />
+            <VoteReceipt dataFrom="url" />
         </MainLayout>
     )
 }

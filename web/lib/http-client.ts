@@ -43,6 +43,7 @@ async function request<TResponse = unknown, TBody = unknown>(
     const config: RequestInit = {
         method,
         headers,
+        credentials: 'include',
     }
 
     if (options.body) {
@@ -50,7 +51,9 @@ async function request<TResponse = unknown, TBody = unknown>(
     }
 
     try {
-        const response = await fetch(url.toString(), config)
+        const response = await fetch(url.toString(), {
+            ...config,
+        })
 
         if (!response.ok) {
             let errorMessage = `HTTP error ${response.status}`
@@ -89,7 +92,12 @@ export const httpClient = {
         body: TBody,
         options?: RequestOptions<TBody>
     ): Promise<TResponse> {
-        return request<TResponse, TBody>('POST', endpoint, { ...options, body })
+        return request<TResponse, TBody>('POST', endpoint, {
+            ...options,
+            body,
+
+            headers: { 'Content-Type': 'application/json' },
+        })
     },
 
     put<TResponse = unknown, TBody = unknown>(
