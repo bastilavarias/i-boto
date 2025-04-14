@@ -4,15 +4,18 @@ import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Vote, BarChart3 } from 'lucide-react'
+import { Vote, BarChart3, LoaderCircle } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { User } from 'firebase/auth'
+import { getTotalVoteCountRepository } from '@/lib/repository/vote'
+import { cn } from '@/lib/utils'
 
 export function DashboardContent() {
     const { user, logout } = useAuth()
 
-    const [totalVotes] = useState(0)
+    const [totalVotes, setTotalVotes] = useState(0)
     const [authUser, setAuthUser] = useState<User | null>(null)
+    const [isLoading, setIsLoading] = useState(true)
 
     const alreadyVoted = useMemo(() => {
         const candidates =
@@ -20,6 +23,24 @@ export function DashboardContent() {
 
         return candidates.length
     }, [localStorage])
+
+    const getTotalVoteCount = async () => {
+        const result = await getTotalVoteCountRepository()
+        if (result?.success) {
+            setTotalVotes(result?.data || 0)
+        }
+    }
+
+    useEffect(() => {
+        const loadData = async () => {
+            setIsLoading(true)
+            await getTotalVoteCount()
+
+            setIsLoading(false)
+        }
+
+        loadData()
+    }, [])
 
     useEffect(() => {
         if (user) {
@@ -90,19 +111,27 @@ export function DashboardContent() {
                         <BarChart3 className="h-4 w-4 text-gray-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">
-                            {totalVotes.toLocaleString()}
-                        </div>
-                        <p className="text-xs text-gray-500 mt-1">
-                            Across all candidates
-                        </p>
-                        <div className="mt-4">
-                            <Button asChild variant="outline">
-                                <Link href="/dashboard/results">
-                                    View Results
-                                </Link>
-                            </Button>
-                        </div>
+                        {isLoading ? (
+                            <div className="w-full h-full flex  justify-center items-center">
+                                <LoaderCircle className="transform animate-spin w-10 h-10" />
+                            </div>
+                        ) : (
+                            <>
+                                <div className="text-2xl font-bold">
+                                    {totalVotes.toLocaleString()}
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Across all candidates
+                                </p>
+                                <div className="mt-4">
+                                    <Button asChild variant="outline">
+                                        <Link href="/dashboard/results">
+                                            View Results
+                                        </Link>
+                                    </Button>
+                                </div>
+                            </>
+                        )}
                     </CardContent>
                 </Card>
             </div>

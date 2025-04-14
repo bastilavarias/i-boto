@@ -30,9 +30,10 @@ router
 
     router
       .group(() => {
-        router.post('/', [VoteController, 'create'])
+        router.post('/', [VoteController, 'create']).use([middleware.firebaseAuth()])
+        router.get('/total', [VoteController, 'countTotalVotes'])
       })
-      .use([middleware.firebaseAuth()])
+
       .prefix('/vote')
 
     router

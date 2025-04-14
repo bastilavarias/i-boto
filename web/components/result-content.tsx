@@ -66,7 +66,7 @@ export function ResultContent() {
     }
 
     useEffect(() => {
-        const loadResults = async () => {
+        const loadData = async () => {
             setIsLoading(true)
             await getLeadingCandidates()
             await getAllCandidates()
@@ -74,7 +74,7 @@ export function ResultContent() {
             setIsLoading(false)
         }
 
-        loadResults()
+        loadData()
     }, [])
 
     return (
@@ -101,7 +101,7 @@ export function ResultContent() {
                                         <div className="font-bold text-4xl">
                                             {index + 1}
                                         </div>
-                                        <div className="flex items-center justify-start pl-32 pr-2 py-4 w-full relative py-2 rounded-l-4xl">
+                                        <div className="flex items-center justify-start pl-28 pr-2 py-4 w-full relative py-2 rounded-l-4xl">
                                             <div className="overflow-hidden flex flex-col items-start justify-center truncate space-y-1">
                                                 <p className="text-2xl font-bold leading-none">
                                                     {truncate(

@@ -188,4 +188,9 @@ export default class VoteController {
       return error.message
     }
   }
+
+  public async countTotalVotes() {
+    const result = await VoteTally.query().count('* as total')
+    return Number(result[0].$extras.total) || 0
+  }
 }
