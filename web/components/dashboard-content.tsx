@@ -8,7 +8,6 @@ import { Vote, BarChart3, LoaderCircle } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { User } from 'firebase/auth'
 import { getTotalVoteCountRepository } from '@/lib/repository/vote'
-import { cn } from '@/lib/utils'
 
 export function DashboardContent() {
     const { user, logout } = useAuth()
