@@ -16,7 +16,7 @@ export class HttpError extends Error {
     }
 }
 
-const baseUrl = process.env.NEXT_PUBLIC_API_KEY || 'http://localhost:3333'
+const baseUrl = process.env.NEXT_PUBLIC_API_URL
 
 if (!baseUrl) {
     console.warn('No base URL provided. Using relative paths')
