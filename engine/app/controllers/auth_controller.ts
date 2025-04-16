@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { firebaseAuth } from '#start/firebase'
+import env from '#start/env'
 
 export default class AuthController {
   public async setToken({ request, response }: HttpContext) {
@@ -7,13 +8,19 @@ export default class AuthController {
       const idToken = request.input('token')
       const decodedToken = await firebaseAuth.verifyIdToken(idToken)
       const uid = decodedToken.uid
-      response.cookie('session', idToken, {
+      const isProd = env.get('NODE_ENV') === 'production'
+      const sessionOptions = {
         httpOnly: true,
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-        secure: process.env.NODE_ENV === 'production',
+        sameSite: isProd ? 'none' : 'lax',
+        secure: isProd,
         maxAge: 60 * 60 * 24 * 5,
         path: '/',
-      })
+      }
+      if (isProd) {
+        //@ts-ignore
+        sessionOptions.domain = env.get('WEB_CLIENT_DOMAIN')
+      }
+      response.cookie('session', idToken)
 
       return response.json({
         message: 'Logged in',
