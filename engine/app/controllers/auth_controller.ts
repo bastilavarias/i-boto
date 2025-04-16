@@ -20,7 +20,8 @@ export default class AuthController {
         //@ts-ignore
         sessionOptions.domain = env.get('WEB_CLIENT_DOMAIN')
       }
-      response.cookie('session', idToken)
+      // @ts-ignore
+      response.cookie('session', idToken, sessionOptions)
 
       return response.json({
         message: 'Logged in',
