@@ -9,10 +9,10 @@ export default class AuthController {
       const uid = decodedToken.uid
       response.cookie('session', idToken, {
         httpOnly: true,
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         secure: process.env.NODE_ENV === 'production',
         maxAge: 60 * 60 * 24 * 5,
         path: '/',
-        sameSite: 'lax',
       })
 
       return response.json({
