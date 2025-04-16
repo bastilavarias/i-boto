@@ -4,22 +4,16 @@ import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { Candidate } from '@/type'
 import { CandidateAvatar } from '@/components/candidate-avatar'
-import { cn } from '@/lib/utils'
-import { Progress } from '@/components/ui/progress'
 import { getCandidatesRepository } from '@/lib/repository/candidate'
-import { Button } from '@/components/ui/button'
-import { Trophy, Flame, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 export function ResultContent() {
     const [leadingCandidates, setLeadingCandidates] = useState<Candidate[]>([])
     const [isLoading, setIsLoading] = useState(true)
-    const [maxVote, setMaxVote] = useState(0)
 
     const [allCandidates, setAllCandidates] = useState<Candidate[]>([])
     const [allCandidatesPage, setAllCandidatesPage] = useState(1)
-    const [isAllCandidatesLoading, setIsAllCandidatesLoading] = useState(false)
-    const [isAllCandidatesLoaded, setIsAllCandidatesLoaded] = useState(false)
 
     const getLeadingCandidates = async () => {
         const result = await getCandidatesRepository({
@@ -33,15 +27,10 @@ export function ResultContent() {
             //@ts-expect-error
             const candidates = result?.data?.data || []
             setLeadingCandidates(candidates)
-
-            if (candidates.length) {
-                setMaxVote(candidates[0].votes || 1) // Prevent division by zero
-            }
         }
     }
 
     const getAllCandidates = async () => {
-        setIsAllCandidatesLoading(true)
         const result = await getCandidatesRepository({
             page: allCandidatesPage,
             perPage: 66,
@@ -53,12 +42,8 @@ export function ResultContent() {
             //@ts-expect-error
             const candidates = result?.data?.data || []
             setAllCandidates([...allCandidates, ...candidates])
-            if (candidates.length !== 12) {
-                setIsAllCandidatesLoaded(true)
-            }
             setAllCandidatesPage(allCandidatesPage + 1)
         }
-        setIsAllCandidatesLoading(false)
     }
 
     useEffect(() => {
@@ -101,19 +86,6 @@ export function ResultContent() {
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
     )
-
-    const getRankBadgeStyle = (index: number) => {
-        switch (index) {
-            case 0:
-                return 'bg-amber-500 text-white'
-            case 1:
-                return 'bg-blue-500 text-white'
-            case 2:
-                return 'bg-rose-500 text-white'
-            default:
-                return 'bg-slate-500 text-white'
-        }
-    }
 
     const CandidateCard = ({
         candidate,
