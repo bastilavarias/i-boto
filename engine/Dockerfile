@@ -1,11 +1,10 @@
-# --------------------------------------------
-# Stage 1: Base image (Debian Slim)
-# --------------------------------------------
-FROM node:20.12.2-slim AS base
+FROM node:22.13.1-slim AS base
 
-# Install Puppeteer dependencies
 RUN apt-get update && \
     apt-get install -y \
+    python3 \
+    make \
+    g++ \
     wget \
     chromium \
     fonts-liberation \
@@ -45,62 +44,34 @@ RUN apt-get update && \
     xdg-utils \
     && rm -rf /var/lib/apt/lists/*
 
-# Puppeteer configuration
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
-# --------------------------------------------
-# Stage 2: Install ALL dependencies
-# --------------------------------------------
+# All deps stage
 FROM base AS deps
 WORKDIR /app
-COPY package.json package-lock.json ./
+ADD package.json package-lock.json ./
 RUN npm ci
 
-# --------------------------------------------
-# Stage 3: Production dependencies only
-# --------------------------------------------
+# Production only deps stage
 FROM base AS production-deps
 WORKDIR /app
-COPY package.json package-lock.json ./
+ADD package.json package-lock.json ./
 RUN npm ci --omit=dev
 
-# --------------------------------------------
-# Stage 4: Build the application
-# --------------------------------------------
+# Build stage
 FROM base AS build
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-RUN node ace build --production
+COPY --from=deps /app/node_modules /app/node_modules
+ADD . .
+RUN node ace build
 
-# --------------------------------------------
-# Final Stage: Production image
-# --------------------------------------------
-FROM node:20.12.2-slim
-ENV NODE_ENV=production \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-
-# Minimal runtime dependencies
-RUN apt-get update && \
-    apt-get install -y \
-    chromium \
-    fonts-liberation \
-    libnss3 \
-    libgbm1 \
-    && rm -rf /var/lib/apt/lists/*
-
+# Production stage
+FROM base
+ENV NODE_ENV=production
 WORKDIR /app
-
-# Copy production node_modules
-COPY --from=production-deps /app/node_modules ./node_modules
-
-# Copy built application
-COPY --from=build /app/build ./
-
-# Verify server entry point
-RUN test -f "./server.js" || test -f "./bin/server.js" || \
-    (echo "ERROR: server.js missing!" && find . -name server.js && exit 1)
+COPY --from=production-deps /app/node_modules /app/node_modules
+COPY --from=build /app/build /app
 
 EXPOSE 3333
 CMD ["node", "./bin/server.js"]
