@@ -65,7 +65,7 @@ export function useAuth(): UseAuthReturn {
     const setToken = async () => {
         try {
             const result = await fetch(
-                'http://localhost:3333/api/auth/set-token',
+                `${process.env.NEXT_PUBLIC_API_URL}/api/auth/set-token`,
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
