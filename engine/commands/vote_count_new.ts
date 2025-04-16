@@ -15,8 +15,11 @@ export default class VoteBatchCount extends BaseCommand {
   async run(voteController: VoteController) {
     try {
       await voteController.batchCount()
+      console.log(`${VoteBatchCount.commandName} is called`)
+      this.logger.info(`${VoteBatchCount.commandName} is called`)
     } catch (error) {
       this.logger.error('Error during vote counting: ' + error.message)
+      console.log('Error during vote counting: ' + error.message)
     }
   }
 }

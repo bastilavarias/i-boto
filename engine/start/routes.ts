@@ -38,7 +38,7 @@ router
 
     router
       .group(() => {
-        router.post('/', [ReceiptController, 'generate'])
+        router.post('/', [ReceiptController, 'generate']).use([middleware.firebaseAuth()])
       })
       .prefix('/receipt')
   })

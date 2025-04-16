@@ -15,8 +15,11 @@ export default class VoteProcess extends BaseCommand {
   async run(voteController: VoteController) {
     try {
       await voteController.process()
+      console.log(`${VoteProcess.commandName} is called`)
+      this.logger.info(`${VoteProcess.commandName} is called`)
     } catch (error) {
       this.logger.error('Error during vote processing: ' + error.message)
+      console.log('Error during vote processing: ' + error.message)
     }
   }
 }

@@ -17,6 +17,27 @@ services:
         networks:
             - network
 
+    cron:
+        container_name: iboto-cron
+        build:
+            context: ./engine
+            dockerfile: Dockerfile
+        restart: unless-stopped
+        env_file: ./engine/.env
+        depends_on:
+            - database
+        networks:
+            - network
+        entrypoint: >
+            sh -c "
+              while true; do
+                node ace vote:process;
+                node ace vote:batch-count;
+                sleep 180;
+              done
+            "
+
+
     database:
         container_name: iboto-database
         image: mysql:8.0
