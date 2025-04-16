@@ -108,49 +108,6 @@ export function Ballot() {
         }
     }, [showWarning])
 
-    const Toolbar = () => {
-        return (
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-center md:gap-4">
-                    <CardTitle className="whitespace-nowrap">
-                        All Candidates
-                    </CardTitle>
-                    <div className="relative bg-white">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-                        <Input
-                            type="search"
-                            placeholder="Search candidate"
-                            className="pl-8 w-full"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            autoFocus={true}
-                        />
-                    </div>
-                </div>
-
-                <Button
-                    size="lg"
-                    onClick={() => setIsSubmitAlertDialogOpen(true)}
-                    disabled={
-                        selectedCandidates.length === 0 ||
-                        selectedCandidates.length > 12 ||
-                        isSubmitting
-                    }
-                    className="w-full md:w-auto"
-                >
-                    {isSubmitting ? (
-                        <>
-                            <div className="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                            Submitting...
-                        </>
-                    ) : (
-                        'Submit'
-                    )}
-                </Button>
-            </div>
-        )
-    }
-
     return (
         <div className="space-y-6">
             <Card className="w-full mx-auto">
@@ -210,7 +167,43 @@ export function Ballot() {
                     </div>
                 </Card>
 
-                <Toolbar />
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-center md:gap-4">
+                        <CardTitle className="whitespace-nowrap">
+                            All Candidates
+                        </CardTitle>
+                        <div className="relative bg-white">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+                            <Input
+                                type="search"
+                                placeholder="Search candidate"
+                                className="pl-8 w-full"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
+                    </div>
+
+                    <Button
+                        size="lg"
+                        onClick={() => setIsSubmitAlertDialogOpen(true)}
+                        disabled={
+                            selectedCandidates.length === 0 ||
+                            selectedCandidates.length > 12 ||
+                            isSubmitting
+                        }
+                        className="w-full md:w-auto"
+                    >
+                        {isSubmitting ? (
+                            <>
+                                <div className="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                Submitting...
+                            </>
+                        ) : (
+                            'Submit'
+                        )}
+                    </Button>
+                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {filteredCandidates.map((candidate) => (
