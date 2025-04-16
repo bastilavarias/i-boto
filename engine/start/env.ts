@@ -71,5 +71,6 @@ export default await Env.create(new URL('../', import.meta.url), {
 |----------------------------------------------------------
 */
   WEB_CLIENT_DOMAIN: Env.schema.string(),
+  COOKIE_DOMAIN: Env.schema.string(),
   RECEIPT_TEMPLATE_SELECTOR: Env.schema.string(),
 })

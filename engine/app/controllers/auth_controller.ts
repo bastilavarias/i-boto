@@ -9,19 +9,14 @@ export default class AuthController {
       const decodedToken = await firebaseAuth.verifyIdToken(idToken)
       const uid = decodedToken.uid
       const isProd = env.get('NODE_ENV') === 'production'
-      const sessionOptions = {
+      response.cookie('session', idToken, {
         httpOnly: true,
-        sameSite: isProd ? 'none' : 'lax',
+        sameSite: isProd ? 'none' : false,
         secure: isProd,
         maxAge: 60 * 60 * 24 * 5,
         path: '/',
-      }
-      if (isProd) {
-        //@ts-ignore
-        sessionOptions.domain = env.get('WEB_CLIENT_DOMAIN')
-      }
-      // @ts-ignore
-      response.cookie('session', idToken, sessionOptions)
+        domain: isProd ? env.get('COOKIE_DOMAIN') : undefined, // if needed across subdomains
+      })
 
       return response.json({
         message: 'Logged in',
