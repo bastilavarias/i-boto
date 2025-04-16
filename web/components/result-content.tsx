@@ -1,19 +1,15 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
-import {
-    Card,
-    CardContent,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card'
-import { Candidate } from '@/type'
+import { useEffect, useState } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import type { Candidate } from '@/type'
 import { CandidateAvatar } from '@/components/candidate-avatar'
-import { cn, truncate } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 import { Progress } from '@/components/ui/progress'
 import { getCandidatesRepository } from '@/lib/repository/candidate'
 import { Button } from '@/components/ui/button'
+import { Trophy, Flame, Loader2 } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 export function ResultContent() {
     const [leadingCandidates, setLeadingCandidates] = useState<Candidate[]>([])
@@ -39,7 +35,7 @@ export function ResultContent() {
             setLeadingCandidates(candidates)
 
             if (candidates.length) {
-                setMaxVote(candidates[0].votes)
+                setMaxVote(candidates[0].votes || 1) // Prevent division by zero
             }
         }
     }
@@ -48,7 +44,7 @@ export function ResultContent() {
         setIsAllCandidatesLoading(true)
         const result = await getCandidatesRepository({
             page: allCandidatesPage,
-            perPage: 12,
+            perPage: 66,
             withVotes: 1,
             sortBy: 'desc',
         })
@@ -57,7 +53,7 @@ export function ResultContent() {
             //@ts-expect-error
             const candidates = result?.data?.data || []
             setAllCandidates([...allCandidates, ...candidates])
-            if (candidates.length != 12) {
+            if (candidates.length !== 12) {
                 setIsAllCandidatesLoaded(true)
             }
             setAllCandidatesPage(allCandidatesPage + 1)
@@ -70,158 +66,157 @@ export function ResultContent() {
             setIsLoading(true)
             await getLeadingCandidates()
             await getAllCandidates()
-
             setIsLoading(false)
         }
 
         loadData()
     }, [])
 
+    // Animation variants
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.05,
+            },
+        },
+    }
+
+    const itemVariants = {
+        hidden: { y: 10, opacity: 0 },
+        visible: {
+            y: 0,
+            opacity: 1,
+            transition: {
+                type: 'spring',
+                stiffness: 100,
+                damping: 15,
+            },
+        },
+    }
+
+    const LoadingSpinner = () => (
+        <div className="flex justify-center items-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+    )
+
+    const getRankBadgeStyle = (index: number) => {
+        switch (index) {
+            case 0:
+                return 'bg-amber-500 text-white'
+            case 1:
+                return 'bg-blue-500 text-white'
+            case 2:
+                return 'bg-rose-500 text-white'
+            default:
+                return 'bg-slate-500 text-white'
+        }
+    }
+
+    const CandidateCard = ({
+        candidate,
+        index,
+    }: {
+        candidate: Candidate
+        index: number
+    }) => {
+        return (
+            <motion.div key={candidate.code || index} variants={itemVariants}>
+                <div className="border rounded-lg p-4 hover:shadow-md transition-shadow bg-white relative">
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center justify-center w-8 h-8 rounded-full font-bold text-xl flex-shrink-0 text-white bg-primary">
+                            {index + 1}
+                        </div>
+                        <CandidateAvatar
+                            candidate={{
+                                ...candidate,
+                                placement: index + 1,
+                            }}
+                            options={{
+                                size: 64,
+                                className: 'w-16 h-16',
+                            }}
+                        />
+                        <div className="flex flex-col">
+                            <h3 className="font-bold text-base">
+                                {candidate.name.split(',')[0]}
+                            </h3>
+                            <p className="text-sm text-slate-500">
+                                {candidate.party && `(${candidate.party})`}
+                            </p>
+                            <div className="flex items-center mt-1">
+                                <span className="text-sm text-slate-500">
+                                    Votes:
+                                </span>
+                                <span className="ml-1 font-medium">
+                                    {candidate.votes || 0}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </motion.div>
+        )
+    }
+
     return (
-        <div className="space-y-14">
-            <Card className="shadow-none border-0 bg-none bg-transparent">
-                <CardHeader>
-                    <CardTitle className="text-3xl font-bold">
-                        🏆 Magic 12
+        <div className="space-y-8 max-w-7xl mx-auto px-4 sm:px-6 py-6">
+            <Card className="bg-transparent border-none shadow-none p-0 overflow-hidden">
+                <CardHeader className="p-0">
+                    <CardTitle className="text-2xl font-bold flex items-center gap-2">
+                        <span>Magic 12</span>
                     </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-0">
                     {isLoading ? (
-                        <div className="flex justify-center items-center h-64">
-                            <div className="border-4 border-gray-300 border-t-gray-600 rounded-full w-8 h-8 animate-spin"></div>
-                        </div>
+                        <LoadingSpinner />
                     ) : (
-                        <div className="grid gap-20 md:grid-cols-2 xl:grid-cols-3">
+                        <motion.div
+                            className="grid gap-4 md:grid-cols-3"
+                            variants={containerVariants}
+                            initial="hidden"
+                            animate="visible"
+                        >
                             {leadingCandidates.map((candidate, index) => (
-                                <div
+                                <CandidateCard
+                                    candidate={candidate}
+                                    index={index}
                                     key={index}
-                                    className="flex items-center justify-between gap-4"
-                                >
-                                    <div className="flex items-start space-x-5 w-full">
-                                        <div className="font-bold text-4xl">
-                                            {index + 1}
-                                        </div>
-                                        <div className="flex items-center justify-start pl-28 pr-2 py-4 w-full relative py-2 rounded-l-4xl">
-                                            <div className="overflow-hidden flex flex-col items-start justify-center truncate space-y-1">
-                                                <p className="text-2xl font-bold leading-none">
-                                                    {truncate(
-                                                        candidate?.name,
-                                                        11
-                                                    )}
-                                                </p>
-                                                <p className="text-xl">
-                                                    Votes:{' '}
-                                                    <span className="font-bold">
-                                                        {candidate?.votes}
-                                                    </span>
-                                                </p>
-                                            </div>
-                                            <div className="absolute -top-3.6 -left-2">
-                                                <div className="relative rounded-full p-[4px]">
-                                                    <CandidateAvatar
-                                                        candidate={candidate}
-                                                        options={{
-                                                            size: 120,
-                                                            className:
-                                                                'w-24 h-24',
-                                                        }}
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                />
                             ))}
-                        </div>
+                        </motion.div>
                     )}
                 </CardContent>
             </Card>
 
-            <Card className="shadow-none border-0 bg-none bg-transparent">
-                <CardHeader>
-                    <CardTitle className="text-3xl font-bold">
-                        🔥 All Candidates
+            <Card className="bg-transparent border-none shadow-none p-0 overflow-hidden">
+                <CardHeader className="p-0">
+                    <CardTitle className="text-2xl font-bold flex items-center gap-2">
+                        <span>All Candidates</span>
                     </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-0">
                     {isLoading ? (
-                        <div className="flex justify-center items-center h-64">
-                            <div className="border-4 border-gray-300 border-t-gray-600 rounded-full w-8 h-8 animate-spin"></div>
-                        </div>
+                        <LoadingSpinner />
                     ) : (
-                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 ">
+                        <motion.div
+                            className="grid gap-4 md:grid-cols-3"
+                            variants={containerVariants}
+                            initial="hidden"
+                            animate="visible"
+                        >
                             {allCandidates.map((candidate, index) => (
-                                <div
-                                    key={candidate.code}
-                                    className="flex items-start gap-3 p-3 border rounded-md space-y-4 bg-white"
-                                >
-                                    <div
-                                        className={cn(
-                                            'flex items-center justify-center w-8 h-8 rounded-full  font-bold text-sm flex-shrink-0',
-                                            index + 1 > 3
-                                                ? 'bg-gray-100 text-gray-800'
-                                                : 'bg-green-100 text-green-800'
-                                        )}
-                                    >
-                                        {index + 1}
-                                    </div>
-                                    <div className="flex items-center gap-2 flex-1  h-full">
-                                        <CandidateAvatar
-                                            candidate={candidate}
-                                            options={{
-                                                className: 'w-24 h-24',
-                                            }}
-                                        />
-                                        <div className="space-y-2 w-full flex flex-col h-full">
-                                            <div className="flex items-center gap-3 flex-1">
-                                                <div>
-                                                    <p className="font-medium cursor-pointer">
-                                                        {candidate.name}
-                                                    </p>
-                                                    <p className="text-sm text-gray-500">
-                                                        ({candidate.party})
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            <div className="w-full space-y-1">
-                                                <p className="font-medium">
-                                                    <span className="text-muted-foreground text-sm">
-                                                        Votes:
-                                                    </span>{' '}
-                                                    <span className="text-md">
-                                                        {candidate.votes.toLocaleString()}
-                                                    </span>
-                                                </p>
-                                                <Progress
-                                                    value={
-                                                        (candidate.votes /
-                                                            maxVote) *
-                                                        100
-                                                    }
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <CandidateCard
+                                    candidate={candidate}
+                                    index={index}
+                                    key={index}
+                                />
                             ))}
-                        </div>
+                        </motion.div>
                     )}
                 </CardContent>
-
-                {!isAllCandidatesLoaded && !isLoading && (
-                    <CardFooter
-                        className="justify-center"
-                        onClick={getAllCandidates}
-                    >
-                        <Button
-                            variant="outline"
-                            disabled={isAllCandidatesLoading}
-                        >
-                            Load more
-                        </Button>
-                    </CardFooter>
-                )}
             </Card>
         </div>
     )
