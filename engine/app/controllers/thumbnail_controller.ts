@@ -128,7 +128,6 @@ export default class ThumbnailController {
 
   private async getAuthorizedClient() {
     const credentials = JSON.parse(readFileSync(CREDENTIALS_PATH, 'utf-8'))
-    console.log(credentials)
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { client_id, client_secret, redirect_uris } = credentials.web
 
@@ -140,7 +139,7 @@ export default class ThumbnailController {
     }
 
     // @ts-ignore
-    if (!oAuth2Client.credentials || oAuth2Client.isTokenExpiring?.()) {
+    if (!oAuth2Client.credentials.access_token || oAuth2Client.isTokenExpiring?.()) {
       if (oAuth2Client.credentials.refresh_token) {
         const newToken = await oAuth2Client.refreshAccessToken()
         oAuth2Client.setCredentials(newToken.credentials)
