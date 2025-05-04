@@ -25,6 +25,7 @@ export default class ThumbnailController {
       candidatesQuery
         .select(['id', 'code'])
         .withCount('voteTallies')
+        .withCount('voteTallies')
         .preload('voteTallies')
         .orderBy('voteTallies_count', 'desc')
       const candidates = await candidatesQuery.paginate(1, 12)
@@ -44,7 +45,6 @@ export default class ThumbnailController {
           votes: voteSum,
         }
       })
-      filteredCandidates.sort((a, b) => b.votes - a.votes)
       const tiles = []
       const containerX = 2235
       let containerY = 0

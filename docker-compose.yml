@@ -33,6 +33,7 @@ services:
               while true; do
                 node ace vote:process;
                 node ace vote:batch-count;
+                node ace generate:thumbnail;
                 sleep 180;
               done
             "
