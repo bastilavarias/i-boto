@@ -1,13 +1,13 @@
 import type { HttpContext } from '@adonisjs/core/http'
 
 import Candidate from '#models/candidate'
-import SignatureService from '#services/signature_service'
 import env from '#start/env'
 import { inject } from '@adonisjs/core'
+import CryptographyService from '#services/cryptography_service'
 
 @inject()
 export default class CandidateController {
-  constructor(private signatureService: SignatureService) {}
+  constructor(private cryptographyService: CryptographyService) {}
 
   public async index({ request }: HttpContext) {
     const {
@@ -29,7 +29,7 @@ export default class CandidateController {
     }
     const filteredCandidates = candidates.all().map((candidate) => {
       const filteredVotes = candidate.voteTallies.filter((vote) => {
-        return this.signatureService.verifyLocalSignature(
+        return this.cryptographyService.verifyLocalSignature(
           env.get('VOTE_TALLY_SIGNATURE_DATA'),
           vote.signature
         )
@@ -43,12 +43,6 @@ export default class CandidateController {
         votes: voteSum,
       }
     })
-
-    if (sortBy === 'asc') {
-      filteredCandidates.sort((a, b) => a.votes - b.votes)
-    } else if (sortBy === 'desc') {
-      filteredCandidates.sort((a, b) => b.votes - a.votes)
-    }
 
     return {
       meta: candidates.getMeta(),

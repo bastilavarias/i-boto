@@ -5,11 +5,11 @@ import fs from 'node:fs'
 import Candidate from '#models/candidate'
 import sharp from 'sharp'
 import env from '#start/env'
-import SignatureService from '#services/signature_service'
+import CryptographyService from '#services/cryptography_service'
 
 @inject()
 export default class ThumbnailController {
-  constructor(private signatureService: SignatureService) {}
+  constructor(private cryptographyService: CryptographyService) {}
   public async generate() {
     try {
       const backgroundPath = path.resolve(
@@ -30,7 +30,7 @@ export default class ThumbnailController {
       const candidates = await candidatesQuery.paginate(1, 12)
       const filteredCandidates = candidates.all().map((candidate) => {
         const filteredVotes = candidate.voteTallies.filter((vote) => {
-          return this.signatureService.verifyLocalSignature(
+          return this.cryptographyService.verifyLocalSignature(
             env.get('VOTE_TALLY_SIGNATURE_DATA'),
             vote.signature
           )
