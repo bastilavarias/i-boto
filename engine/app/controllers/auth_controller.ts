@@ -11,18 +11,16 @@ export default class AuthController {
       const isProd = env.get('NODE_ENV') === 'production'
       response.cookie('session', idToken, {
         httpOnly: true,
-        sameSite: isProd ? 'none' : false,
         secure: isProd,
-        maxAge: 60 * 60 * 24 * 5,
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 5, // 5 days
         path: '/',
-        domain: isProd ? env.get('COOKIE_DOMAIN') : undefined, // if needed across subdomains
+        ...(isProd && env.get('COOKIE_DOMAIN') ? { domain: env.get('COOKIE_DOMAIN') } : {}),
       })
 
       return response.json({
         message: 'Logged in',
-        data: {
-          uid,
-        },
+        data: { uid },
       })
     } catch (error) {
       return response.unauthorized({ message: 'Invalid token' })
