@@ -173,7 +173,7 @@ export function Ballot() {
                             All Candidates
                         </CardTitle>
                         <div className="relative bg-white">
-                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                             <Input
                                 type="search"
                                 placeholder="Search candidate"
@@ -233,7 +233,7 @@ export function Ballot() {
                                     >
                                         {candidate.placement}. {candidate.name}
                                     </label>
-                                    <p className="text-sm text-gray-500">
+                                    <p className="text-sm text-muted-foreground">
                                         ({candidate.party})
                                     </p>
                                 </div>

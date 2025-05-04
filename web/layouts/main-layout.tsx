@@ -209,8 +209,8 @@ export function MainLayout({ children }: MainLayoutProps) {
                                                             <navigation.icon
                                                                 className={`mr-4 flex-shrink-0 h-6 w-6 ${
                                                                     isActive
-                                                                        ? 'text-gray-500'
-                                                                        : 'text-gray-400 group-hover:text-gray-500'
+                                                                        ? 'text-muted-foreground'
+                                                                        : 'text-gray-400 group-hover:text-muted-foreground'
                                                                 }`}
                                                                 aria-hidden="true"
                                                             />
@@ -236,8 +236,25 @@ export function MainLayout({ children }: MainLayoutProps) {
 
             <footer className="bg-white border-t py-6">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center text-sm text-gray-500">
-                        <p>© {new Date().getFullYear()} iBoto.</p>
+                    <div className="flex flex-col md:flex-row items-center justify-between text-sm text-muted-foreground space-y-4 md:space-y-0">
+                        <p>
+                            © {new Date().getFullYear()} iBoto. All rights
+                            reserved.
+                        </p>
+                        <div className="flex space-x-4">
+                            <Link href="/about" className="hover:underline">
+                                About
+                            </Link>
+                            <Link href="/privacy" className="hover:underline">
+                                Privacy Policy
+                            </Link>
+                            <Link href="/terms" className="hover:underline">
+                                Terms of Service
+                            </Link>
+                            <Link href="/contact" className="hover:underline">
+                                Contact
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </footer>

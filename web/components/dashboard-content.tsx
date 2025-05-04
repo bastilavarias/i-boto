@@ -52,7 +52,7 @@ export function DashboardContent() {
             <div>
                 <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
                 {authUser && (
-                    <p className="text-gray-500">
+                    <p className="text-muted-foreground">
                         Welcome {authUser?.displayName},{' '}
                         <span
                             className="underline cursor-pointer"
@@ -70,13 +70,13 @@ export function DashboardContent() {
                         <CardTitle className="text-sm font-medium">
                             Voting Status
                         </CardTitle>
-                        <Vote className="h-4 w-4 text-gray-500" />
+                        <Vote className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">
                             {alreadyVoted ? 'Completed' : 'Not Voted'}
                         </div>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-muted-foreground mt-1">
                             {alreadyVoted
                                 ? 'You have submitted your ballot'
                                 : "You haven't cast your vote yet"}
@@ -107,7 +107,7 @@ export function DashboardContent() {
                         <CardTitle className="text-sm font-medium">
                             Total Votes Cast
                         </CardTitle>
-                        <BarChart3 className="h-4 w-4 text-gray-500" />
+                        <BarChart3 className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         {isLoading ? (
@@ -119,7 +119,7 @@ export function DashboardContent() {
                                 <div className="text-2xl font-bold">
                                     {totalVotes.toLocaleString()}
                                 </div>
-                                <p className="text-xs text-gray-500 mt-1">
+                                <p className="text-xs text-muted-foreground mt-1">
                                     Across all candidates
                                 </p>
                                 <div className="mt-4">

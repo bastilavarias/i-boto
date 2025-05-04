@@ -7,7 +7,7 @@ const sansSerif = Poppins({
     variable: '--font-poppins',
     weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
     preload: true,
-    subsets: ['latin']
+    subsets: ['latin'],
 })
 
 const mono = JetBrains_Mono({
@@ -19,7 +19,8 @@ const mono = JetBrains_Mono({
 
 export const metadata: Metadata = {
     title: 'iBoto | Philippines 2025 Senatorial Election',
-    description: 'test',
+    description:
+        'Stay informed and make your vote count with iBoto — your trusted platform for learning about candidates, comparing their platforms, and tracking senatorial election updates for the 2025 Philippines elections.',
 }
 
 export default function RootLayout({

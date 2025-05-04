@@ -7,7 +7,7 @@ import { CandidateAvatar } from '@/components/candidate-avatar'
 import { getCandidatesRepository } from '@/lib/repository/candidate'
 import { Loader2 } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { cn, truncate } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 
 export function ResultContent() {
     const [leadingCandidates, setLeadingCandidates] = useState<Candidate[]>([])
@@ -138,7 +138,15 @@ export function ResultContent() {
     }
 
     return (
-        <div className="space-y-12 max-w-7xl mx-auto px-4 sm:px-6 py-6">
+        <div className="space-y-6 max-w-7xl mx-auto">
+            <div>
+                <h1 className="text-2xl font-bold tracking-tight">
+                    iBoto Senator Results
+                </h1>
+                <p className="text-muted-foreground">
+                    Results updated every 3 minutes...
+                </p>
+            </div>
             <Card className="bg-transparent border-none shadow-none p-0 overflow-hidden">
                 <CardHeader className="p-0">
                     <CardTitle className="text-4xl font-bold flex items-center gap-2">
