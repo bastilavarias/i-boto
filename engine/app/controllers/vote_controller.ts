@@ -3,22 +3,16 @@ import RawVote from '#models/raw_vote'
 import { MerkleTree } from 'merkletreejs'
 import keccak256 from 'keccak256'
 import web3StorageClient from '#start/web3_storage'
-import EncryptionService from '#services/encryption_service'
-import SignatureService from '#services/signature_service'
 import UserHistory from '#models/user_history'
-import HashingService from '#services/hashing_service'
 import VoteRecord from '#models/vote_record'
 import VoteTally from '#models/vote_tally'
 import env from '#start/env'
 import { inject } from '@adonisjs/core'
+import CryptographyService from '#services/cryptography_service'
 
 @inject()
 export default class VoteController {
-  constructor(
-    private encryptionService: EncryptionService,
-    private signatureService: SignatureService,
-    private hashingService: HashingService
-  ) {}
+  constructor(private cryptographyService: CryptographyService) {}
 
   public async create({ request, response }: HttpContext) {
     try {
@@ -28,7 +22,7 @@ export default class VoteController {
       if (!user) {
         throw new Error('Impostor.SUS.')
       }
-      const isValidSignature = this.signatureService.verifyClientSignature(
+      const isValidSignature = this.cryptographyService.verifyClientSignature(
         JSON.stringify(vote),
         sig,
         pubKey
@@ -39,7 +33,7 @@ export default class VoteController {
       const encryptedVote = {
         ...vote,
         candidates: vote.candidates.map((candidate: string) =>
-          this.encryptionService.encrypt(candidate)
+          this.cryptographyService.encrypt(candidate)
         ),
       }
       const rawVote = await RawVote.create({
@@ -51,7 +45,7 @@ export default class VoteController {
         throw new Error('Invalid vote process.')
       }
       await UserHistory.create({
-        user: this.hashingService.makeHash(user),
+        user: this.cryptographyService.makeHash(user),
       })
 
       return response.status(200).json({
@@ -79,10 +73,10 @@ export default class VoteController {
         const decryptedVoteData = {
           ...parsedVote,
           candidates: parsedVote.candidates.map((candidate: string) => {
-            return this.encryptionService.decrypt(candidate)
+            return this.cryptographyService.decrypt(candidate)
           }),
         }
-        const isValidSignature = this.signatureService.verifyClientSignature(
+        const isValidSignature = this.cryptographyService.verifyClientSignature(
           JSON.stringify(decryptedVoteData),
           signature,
           publicKey
@@ -103,11 +97,11 @@ export default class VoteController {
       const leaves = votes.map((vote) => keccak256(Buffer.from(vote)))
       const tree = new MerkleTree(leaves, keccak256, { sortPairs: true })
       const root = tree.getRoot().toString('hex')
-      const signature = this.signatureService.sign(root)
+      const signature = this.cryptographyService.sign(root)
       const voteTree = {
         root,
         leaves: leaves.map((leaf) => leaf.toString('hex')),
-        votes: votes.map((vote) => this.encryptionService.encrypt(vote)),
+        votes: votes.map((vote) => this.cryptographyService.encrypt(vote)),
         signature,
       }
       const blob = new Blob([JSON.stringify(voteTree)], { type: 'application/json' })
@@ -141,7 +135,7 @@ export default class VoteController {
       const res = await fetch(`https://w3s.link/ipfs/${cid}`)
       const arrayBuffer = await res.arrayBuffer()
       const { root, votes, leaves, signature } = JSON.parse(Buffer.from(arrayBuffer).toString())
-      const validSignature = this.signatureService.verifyLocalSignature(root, signature)
+      const validSignature = this.cryptographyService.verifyLocalSignature(root, signature)
       if (!validSignature) {
         throw new Error('Invalid Signature.')
       }
@@ -149,7 +143,7 @@ export default class VoteController {
       const reconstructedTree = new MerkleTree(leafBuffers, keccak256, { sortPairs: true })
       const validVotes: string[] = []
       votes.forEach((vote: string) => {
-        const decryptedVote = this.encryptionService.decrypt(vote)
+        const decryptedVote = this.cryptographyService.decrypt(vote)
         const hashedVote = keccak256(Buffer.from(decryptedVote))
         const proof = reconstructedTree.getProof(hashedVote)
         const isValid = reconstructedTree.verify(proof, hashedVote, root)
@@ -177,7 +171,7 @@ export default class VoteController {
           candidate,
           vote,
           batch: voteRecord.id,
-          signature: this.signatureService.sign(env.get('VOTE_TALLY_SIGNATURE_DATA')),
+          signature: this.cryptographyService.sign(env.get('VOTE_TALLY_SIGNATURE_DATA')),
         })
       }
 

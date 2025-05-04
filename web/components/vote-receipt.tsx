@@ -24,7 +24,7 @@ export function VoteReceipt({ dataFrom }: VoteReceiptProps) {
             main: 'iBoto',
             subtitle: 'Decentralized Mock Election Website',
         },
-        heading: 'I voted for these Senators',
+        heading: 'My Personal Ballot',
         footer: {
             hashtag: '#HALALAN2025',
             website: 'www.iboto.vercel.app',
@@ -112,6 +112,63 @@ export function VoteReceipt({ dataFrom }: VoteReceiptProps) {
         </div>
     )
 
+    const CandidateItem = ({ candidate }: { candidate: Candidate | null }) => {
+        return (
+            <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center space-x-4 w-full">
+                    <div className="flex items-center justify-start pl-40 pr-2 py-4 bg-white w-full relative py-2 rounded-l-4xl rounded-br-4xl">
+                        <h3
+                            className="font-bold text-5xl text-yellow pr-3"
+                            style={{
+                                color: COLORS.yellow,
+                            }}
+                        >
+                            {candidate?.placement}
+                        </h3>
+                        <div className="overflow-hidden flex flex-col items-start justify-center truncate">
+                            <p
+                                className="text-4xl font-bold leading-none"
+                                style={{
+                                    color: COLORS.blue,
+                                }}
+                            >
+                                {truncate(candidate?.name || 'Vacant', 11)}
+                            </p>
+                            <p
+                                className="font-medium text-xl"
+                                style={{
+                                    color: COLORS.red,
+                                }}
+                            >
+                                {candidate?.party || 'No candidate selected'}
+                            </p>
+                        </div>
+                        <div className="absolute -top-3.6 -left-2">
+                            <div
+                                className="relative rounded-full p-[4px]"
+                                style={{
+                                    backgroundImage: `linear-gradient(to right, ${COLORS.blue}, ${COLORS.red})`,
+                                }}
+                            >
+                                {candidate ? (
+                                    <CandidateAvatar
+                                        candidate={candidate}
+                                        options={{
+                                            size: 120,
+                                            className: 'w-36 h-36',
+                                        }}
+                                    />
+                                ) : (
+                                    <div className="w-36 h-36 rounded-full bg-white" />
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
     return (
         <div
             id="receipt-template"
@@ -135,71 +192,10 @@ export function VoteReceipt({ dataFrom }: VoteReceiptProps) {
                     {filteredCandidates.map(
                         (candidate: Candidate | null, index: number) => {
                             return (
-                                <div
+                                <CandidateItem
                                     key={index}
-                                    className="flex items-center justify-between gap-4"
-                                >
-                                    <div className="flex items-center space-x-5 w-full">
-                                        <div
-                                            className="font-bold text-6xl"
-                                            style={{
-                                                color: candidate
-                                                    ? COLORS.yellow
-                                                    : 'white',
-                                            }}
-                                        >
-                                            {index + 1}
-                                        </div>
-                                        <div className="flex items-center justify-start pl-40 pr-2 py-4 bg-white w-full relative py-2 rounded-l-4xl rounded-br-4xl">
-                                            <div className="overflow-hidden flex flex-col items-start justify-center truncate">
-                                                <p
-                                                    className="text-4xl font-bold leading-none"
-                                                    style={{
-                                                        color: COLORS.blue,
-                                                    }}
-                                                >
-                                                    {truncate(
-                                                        candidate?.name ||
-                                                            'Vacant',
-                                                        11
-                                                    )}
-                                                </p>
-                                                <p
-                                                    className="font-medium text-xl"
-                                                    style={{
-                                                        color: COLORS.red,
-                                                    }}
-                                                >
-                                                    {candidate?.party ||
-                                                        'No candidate selected'}
-                                                </p>
-                                            </div>
-                                            <div className="absolute -top-3.6 -left-2">
-                                                <div
-                                                    className="relative rounded-full p-[4px]"
-                                                    style={{
-                                                        backgroundImage: `linear-gradient(to right, ${COLORS.blue}, ${COLORS.red})`,
-                                                    }}
-                                                >
-                                                    {candidate ? (
-                                                        <CandidateAvatar
-                                                            candidate={
-                                                                candidate
-                                                            }
-                                                            options={{
-                                                                size: 120,
-                                                                className:
-                                                                    'w-36 h-36',
-                                                            }}
-                                                        />
-                                                    ) : (
-                                                        <div className="w-36 h-36 rounded-full bg-white" />
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                    candidate={candidate}
+                                />
                             )
                         }
                     )}
