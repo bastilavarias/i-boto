@@ -13,7 +13,7 @@ export default class ReceiptController {
       const base64image = await this.receiptService.generate(codes)
 
       return response.status(200).send({
-        message: 'Receipt generated successfully',
+        message: 'Personal Ballot generated successfully',
         data: {
           image: base64image,
           mimeType: 'image/png',

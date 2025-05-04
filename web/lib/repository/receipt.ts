@@ -7,7 +7,7 @@ export const generateReceiptRepository = async (codes: string[]) => {
         })
         return toQueryResponse.success(
             response,
-            'Receipt successfully generated!'
+            'Personal Ballot successfully generated!'
         )
     } catch (error) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment

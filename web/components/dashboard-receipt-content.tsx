@@ -33,14 +33,14 @@ export function DashboardReceiptContent() {
                         document.body.removeChild(link)
 
                         toast.success(
-                            'Receipt successfully generated. It will automatically downloaded in your device.'
+                            'Personal Ballot successfully generated. It will automatically downloaded in your device.'
                         )
                         setIsLoading(false)
                         return
                     } else {
                         toast.error(
                             result.message ||
-                                'Receipt download failed. Please try again later.'
+                                'Personal Ballot download failed. Please try again later.'
                         )
                     }
                 }
@@ -49,7 +49,7 @@ export function DashboardReceiptContent() {
                     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                     // @ts-expect-error
                     error.message ||
-                        'Receipt download failed. Please try again later.'
+                        'Personal Ballot download failed. Please try again later.'
                 )
             }
             setIsLoading(false)

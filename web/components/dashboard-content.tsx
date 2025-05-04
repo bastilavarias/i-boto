@@ -94,7 +94,7 @@ export function DashboardContent() {
                                     }
                                 >
                                     {alreadyVoted
-                                        ? 'View Your Receipt'
+                                        ? 'View Your Ballot'
                                         : 'Vote Now'}
                                 </Link>
                             </Button>
