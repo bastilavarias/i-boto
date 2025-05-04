@@ -136,7 +136,7 @@ export function Ballot() {
                 </CardHeader>
 
                 <CardContent>
-                    <div className="mt-4 p-4 bg-white border rounded-md">
+                    <div className="bg-white">
                         <h2 className="font-semibold text-lg mb-2">
                             INSTRUCTIONS FOR VOTING
                         </h2>
@@ -153,7 +153,7 @@ export function Ballot() {
             </Card>
 
             <div className="space-y-8">
-                <Card className="sticky left-0 top-[6.5%] z-10 rounded-none shadow-none py-0">
+                <Card className="rounded-none shadow-none py-0">
                     <div className="bg-green-100 text-center p-2 flex-col justify-between">
                         <div className="" />
                         <p className="font-bold text-green-800">
