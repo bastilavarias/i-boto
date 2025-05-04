@@ -7,6 +7,7 @@ import { CandidateAvatar } from '@/components/candidate-avatar'
 import { getCandidatesRepository } from '@/lib/repository/candidate'
 import { Loader2 } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { cn, truncate } from '@/lib/utils'
 
 export function ResultContent() {
     const [leadingCandidates, setLeadingCandidates] = useState<Candidate[]>([])
@@ -57,7 +58,6 @@ export function ResultContent() {
         loadData()
     }, [])
 
-    // Animation variants
     const containerVariants = {
         hidden: { opacity: 0 },
         visible: {
@@ -96,9 +96,16 @@ export function ResultContent() {
     }) => {
         return (
             <motion.div key={candidate.code || index} variants={itemVariants}>
-                <div className="border rounded-lg p-4 hover:shadow-md transition-shadow bg-white relative">
-                    <div className="flex items-center gap-4">
-                        <div className="flex items-center justify-center w-8 h-8 rounded-full font-bold text-xl flex-shrink-0 text-white bg-primary">
+                <div className="p-4 transition-shadow relative">
+                    <div className="flex items-start gap-4">
+                        <div
+                            className={cn(
+                                'flex items-center justify-center w-8 h-8 rounded-full font-bold text-xl flex-shrink-0',
+                                index + 1 <= 12
+                                    ? 'text-white bg-primary'
+                                    : 'text-primary'
+                            )}
+                        >
                             {index + 1}
                         </div>
                         <CandidateAvatar
@@ -107,24 +114,21 @@ export function ResultContent() {
                                 placement: index + 1,
                             }}
                             options={{
-                                size: 64,
-                                className: 'w-16 h-16',
+                                size: 120,
+                                className: 'w-20 h-20',
                             }}
                         />
                         <div className="flex flex-col">
-                            <h3 className="font-bold text-base">
-                                {candidate.name.split(',')[0]}
+                            <h3 className="font-bold text-lg">
+                                {candidate.name}
                             </h3>
-                            <p className="text-sm text-slate-500">
+                            <p className="text-md text-slate-500">
                                 {candidate.party && `(${candidate.party})`}
                             </p>
-                            <div className="flex items-center mt-1">
-                                <span className="text-sm text-slate-500">
-                                    Votes:
-                                </span>
-                                <span className="ml-1 font-medium">
+                            <div className="flex items-center mt-3">
+                                <p className="ml-1 font-bold text-2xl">
                                     {candidate.votes || 0}
-                                </span>
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -134,11 +138,11 @@ export function ResultContent() {
     }
 
     return (
-        <div className="space-y-8 max-w-7xl mx-auto px-4 sm:px-6 py-6">
+        <div className="space-y-12 max-w-7xl mx-auto px-4 sm:px-6 py-6">
             <Card className="bg-transparent border-none shadow-none p-0 overflow-hidden">
                 <CardHeader className="p-0">
-                    <CardTitle className="text-2xl font-bold flex items-center gap-2">
-                        <span>Magic 12</span>
+                    <CardTitle className="text-4xl font-bold flex items-center gap-2">
+                        <span>Magic 12 🏆</span>
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="px-0">
@@ -146,7 +150,7 @@ export function ResultContent() {
                         <LoadingSpinner />
                     ) : (
                         <motion.div
-                            className="grid gap-4 md:grid-cols-3"
+                            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
                             variants={containerVariants}
                             initial="hidden"
                             animate="visible"
@@ -162,11 +166,10 @@ export function ResultContent() {
                     )}
                 </CardContent>
             </Card>
-
             <Card className="bg-transparent border-none shadow-none p-0 overflow-hidden">
                 <CardHeader className="p-0">
-                    <CardTitle className="text-2xl font-bold flex items-center gap-2">
-                        <span>All Candidates</span>
+                    <CardTitle className="text-4xl font-bold flex items-center gap-2">
+                        <span>All Candidates 🔥</span>
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="px-0">
@@ -174,7 +177,7 @@ export function ResultContent() {
                         <LoadingSpinner />
                     ) : (
                         <motion.div
-                            className="grid gap-4 md:grid-cols-3"
+                            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
                             variants={containerVariants}
                             initial="hidden"
                             animate="visible"
