@@ -14,7 +14,7 @@ export default class GenerateThumbnail extends BaseCommand {
   @inject()
   async run(thumbnailController: ThumbnailController) {
     try {
-      await thumbnailController.generate()
+      await thumbnailController.generateUpload()
       console.log(`${GenerateThumbnail.commandName} is called`)
       this.logger.info(`${GenerateThumbnail.commandName} is called`)
     } catch (error) {

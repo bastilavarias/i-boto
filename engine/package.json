@@ -59,6 +59,7 @@
     "better-sqlite3": "^11.9.1",
     "firebase-admin": "^13.2.0",
     "generic-pool": "^3.9.0",
+    "googleapis": "^148.0.0",
     "keccak256": "^1.0.6",
     "luxon": "^3.6.1",
     "merkletreejs": "^0.5.1",

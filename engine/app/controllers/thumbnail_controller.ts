@@ -1,22 +1,33 @@
-// import type { HttpContext } from '@adonisjs/core/http'
 import { inject } from '@adonisjs/core'
 import path from 'node:path'
-import fs from 'node:fs'
+import { readFileSync, existsSync, createReadStream } from 'node:fs'
 import Candidate from '#models/candidate'
 import sharp from 'sharp'
 import env from '#start/env'
 import CryptographyService from '#services/cryptography_service'
+import { google } from 'googleapis'
 
 @inject()
 export default class ThumbnailController {
   constructor(private cryptographyService: CryptographyService) {}
-  public async generate() {
+
+  public async generateUpload() {
+    try {
+      await this.generate()
+      await this.upload()
+      process.exit(1)
+    } catch (error) {
+      console.error('Generate upload error:', error)
+    }
+  }
+
+  private async generate() {
     try {
       const backgroundPath = path.resolve(
         import.meta.dirname,
         '../../assets/images/thumbnail-base.jpg'
       )
-      if (!fs.existsSync(backgroundPath)) {
+      if (!existsSync(backgroundPath)) {
         console.error('Missing background.')
         process.exit(1)
       }
@@ -78,11 +89,32 @@ export default class ThumbnailController {
         paddingY += imageHeight
       }
       const outputPath = path.resolve(import.meta.dirname, '../../assets/images/thumbnail.jpg')
-      await sharp(backgroundPath).composite(tiles).jpeg({ quality: 89 }).toFile(outputPath)
+      await sharp(backgroundPath).composite(tiles).jpeg({ quality: 98 }).toFile(outputPath)
 
       console.log('Image composited successfully.')
     } catch (error) {
-      console.error('Sharp error:', error)
+      console.error('Generate thumbnail error:', error)
+    }
+  }
+
+  private async upload() {
+    try {
+      const client = new google.auth.OAuth2()
+      const refreshTokenJSON = readFileSync(
+        path.resolve(import.meta.dirname, '../../ytvu-refresh-token.json'),
+        'utf-8'
+      )
+      client.setCredentials(JSON.parse(refreshTokenJSON))
+      const youtube = google.youtube({ version: 'v3', auth: client })
+      const youtubeVideoID = env.get('YOUTUBE_VIDEO_ID')
+      await youtube.thumbnails.set({
+        videoId: youtubeVideoID,
+        media: {
+          body: createReadStream(path.join('assets', 'images', 'thumbnail.jpg'), 'utf-8'),
+        },
+      })
+    } catch (error) {
+      console.error('Upload error:', error)
     }
   }
 }
