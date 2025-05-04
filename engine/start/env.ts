@@ -73,5 +73,6 @@ export default await Env.create(new URL('../', import.meta.url), {
   WEB_CLIENT_DOMAIN: Env.schema.string(),
   COOKIE_DOMAIN: Env.schema.string(),
   RECEIPT_TEMPLATE_SELECTOR: Env.schema.string(),
-  YOUTUBE_VIDEO_ID: Env.schema.string(),
+  GOOGLE_API_KEY: Env.schema.string(),
+  GOOGLE_API_URL: Env.schema.string(),
 })
