@@ -17,12 +17,10 @@ export default class AuthController {
         maxAge: 60 * 60,
         path: '/',
       }
-      console.log(isProd)
       if (isProd) {
         cookieOptions.secure = true
         cookieOptions.domain = domain
       }
-      console.log(cookieOptions)
       response.cookie('session', idToken, cookieOptions)
 
       return response.json({
