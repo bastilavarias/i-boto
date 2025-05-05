@@ -10,7 +10,6 @@ import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { useAuth } from '@/hooks/useAuth'
 
 export function ResultContent() {
     const [leadingCandidates, setLeadingCandidates] = useState<Candidate[]>([])

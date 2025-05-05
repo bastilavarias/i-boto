@@ -31,6 +31,7 @@ import {
     TableRow,
 } from '@/components/ui/table'
 import { Candidate } from '@/type'
+import { motion } from 'framer-motion'
 
 const MAX_SELECTIONS = 12
 
@@ -107,6 +108,16 @@ export function Ballot() {
             setShowWarning(false)
         }
     }, [showWarning])
+
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.05,
+            },
+        },
+    }
 
     return (
         <div className="space-y-6">
@@ -205,7 +216,12 @@ export function Ballot() {
                     </Button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <motion.div
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+                >
                     {filteredCandidates.map((candidate) => (
                         <div
                             key={candidate.code}
@@ -246,7 +262,7 @@ export function Ballot() {
                             />
                         </div>
                     ))}
-                </div>
+                </motion.div>
             </div>
 
             <AlertDialog open={isSubmitAlertDialogOpen}>
