@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Github, Globe, Youtube, Twitter, Linkedin } from 'lucide-react'
+import { Github, Globe, Youtube, Linkedin } from 'lucide-react'
 import Link from 'next/link'
 import { MainLayout } from '@/layouts/main-layout'
 

@@ -2,6 +2,16 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { firebaseAuth } from '#start/firebase'
 import env from '#start/env'
 
+interface CustomCookieOptions {
+  httpOnly: boolean
+  secure: boolean
+  sameSite: string
+  maxAge: number
+  path: string
+  secure?: boolean | undefined
+  domain?: string | undefined
+}
+
 export default class AuthController {
   public async setToken({ request, response }: HttpContext) {
     try {
@@ -10,7 +20,7 @@ export default class AuthController {
       const uid = decodedToken.uid
       const isProd = env.get('NODE_ENV') === 'production'
       const domain = isProd ? env.get('COOKIE_DOMAIN') : undefined
-      const cookieOptions = {
+      const cookieOptions: CustomCookieOptions = {
         httpOnly: true,
         secure: false,
         sameSite: 'lax',
@@ -18,8 +28,8 @@ export default class AuthController {
         path: '/',
       }
       if (isProd) {
-        cookieOptions.secure = true
-        cookieOptions.domain = domain
+        cookieOptions?.secure = true
+        cookieOptions?.domain = domain
       }
       response.cookie('session', idToken, cookieOptions)
 
