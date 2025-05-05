@@ -12,6 +12,7 @@ export default class FirebaseAuthMiddleware {
 
     try {
       const firebaseUser = await firebaseAuth.verifyIdToken(cookie)
+      //@ts-ignore
       ctx.request.user = firebaseUser.email
 
       await next()

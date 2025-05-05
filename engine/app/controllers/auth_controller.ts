@@ -5,10 +5,9 @@ import env from '#start/env'
 interface CustomCookieOptions {
   httpOnly: boolean
   secure: boolean
-  sameSite: string
+  sameSite: 'lax'
   maxAge: number
   path: string
-  secure?: boolean | undefined
   domain?: string | undefined
 }
 
@@ -28,8 +27,8 @@ export default class AuthController {
         path: '/',
       }
       if (isProd) {
-        cookieOptions?.secure = true
-        cookieOptions?.domain = domain
+        cookieOptions.secure = true
+        cookieOptions.domain = domain
       }
       response.cookie('session', idToken, cookieOptions)
 
