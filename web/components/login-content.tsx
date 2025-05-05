@@ -57,9 +57,8 @@ export function LoginContent() {
                 <CardContent className="flex flex-col gap-4">
                     <Alert className="bg-blue-50 border-blue-200">
                         <AlertDescription className="text-blue-700">
-                            This is a demo application. Your email will not be
-                            stored in any database and is only kept locally in
-                            your browser.
+                            Your email will not be stored in any database and is
+                            only kept locally in your browser.
                         </AlertDescription>
                     </Alert>
 

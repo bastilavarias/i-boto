@@ -9,6 +9,7 @@ import {
     LayoutDashboard,
     Vote,
     LucideProps,
+    Code,
 } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -16,6 +17,7 @@ import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet'
 import { useAuth } from '@/hooks/useAuth'
 import { Toaster } from '@/components/ui/sonner'
 import { initializeKeyPair } from '@/lib/crypto/keypair'
+import Image from 'next/image'
 
 interface MainLayoutProps {
     children: React.ReactNode
@@ -28,6 +30,14 @@ type Navigation = {
         Omit<LucideProps, 'ref'> & React.RefAttributes<SVGSVGElement>
     >
 }
+
+const defaultNavs: Navigation[] = [
+    {
+        name: 'About',
+        href: '/about',
+        icon: Code,
+    },
+]
 
 const publicNavs: Navigation[] = [
     {
@@ -94,6 +104,19 @@ export function MainLayout({ children }: MainLayoutProps) {
             navs = privateNavs
         } else if (isPublicRoute) {
             navs = publicNavs
+        }
+        navs = [...navs, ...defaultNavs]
+        if (navs.length > 1) {
+            localStorage.setItem(
+                'last_navs_keys',
+                JSON.stringify(navs.map((nav) => nav.name))
+            )
+        }
+        if (pathname === '/about') {
+            const navKeys = JSON.parse(localStorage.getItem('last_navs_keys'))
+            navs = [...privateNavs, ...publicNavs, ...defaultNavs].filter(
+                (nav) => navKeys.includes(nav.name)
+            )
         }
 
         setNavs(
@@ -245,15 +268,6 @@ export function MainLayout({ children }: MainLayoutProps) {
                             <Link href="/about" className="hover:underline">
                                 About
                             </Link>
-                            <Link href="/privacy" className="hover:underline">
-                                Privacy Policy
-                            </Link>
-                            <Link href="/terms" className="hover:underline">
-                                Terms of Service
-                            </Link>
-                            <Link href="/contact" className="hover:underline">
-                                Contact
-                            </Link>
                         </div>
                     </div>
                 </div>
@@ -267,7 +281,16 @@ export function MainLayout({ children }: MainLayoutProps) {
 function LogoLink() {
     return (
         <Link href="/" className="flex items-center gap-2">
-            <span className="text-3xl font-bold">iBoto</span>
+            <div className="w-12 md:w-12">
+                <Image
+                    src="/logo/iboto-logo.png"
+                    alt="iBoto Logo"
+                    width={1920}
+                    height={1080}
+                    className="w-full h-auto"
+                />
+            </div>
+            <span className="text-3xl font-bold">iBoto 2025</span>{' '}
         </Link>
     )
 }

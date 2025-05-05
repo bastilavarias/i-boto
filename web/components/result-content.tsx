@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { Candidate } from '@/type'
 import { CandidateAvatar } from '@/components/candidate-avatar'
@@ -8,13 +8,26 @@ import { getCandidatesRepository } from '@/lib/repository/candidate'
 import { Loader2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
+import { useAuth } from '@/hooks/useAuth'
 
 export function ResultContent() {
     const [leadingCandidates, setLeadingCandidates] = useState<Candidate[]>([])
     const [isLoading, setIsLoading] = useState(true)
-
     const [allCandidates, setAllCandidates] = useState<Candidate[]>([])
     const [allCandidatesPage, setAllCandidatesPage] = useState(1)
+
+    const alreadyVoted = useMemo(() => {
+        if (typeof window !== 'undefined') {
+            const candidates =
+                JSON.parse(localStorage.getItem('candidates') as string) || []
+
+            return candidates.length
+        }
+
+        return false
+    }, [])
 
     const getLeadingCandidates = async () => {
         const result = await getCandidatesRepository({
@@ -97,7 +110,7 @@ export function ResultContent() {
         return (
             <motion.div key={candidate.code || index} variants={itemVariants}>
                 <div className="p-4 transition-shadow relative">
-                    <div className="flex items-start gap-1">
+                    <div className="flex items-start gap-2">
                         <div
                             className={cn(
                                 'flex items-center justify-center w-8 h-8 rounded-full font-bold text-xl flex-shrink-0',
@@ -119,17 +132,15 @@ export function ResultContent() {
                             }}
                         />
                         <div className="flex flex-col">
-                            <h3 className="font-bold text-lg">
+                            <h3 className="font-semibold text-base md:text-lg">
                                 {candidate.name}
                             </h3>
-                            <p className="text-md text-slate-500">
+                            <p className="text-sm text-slate-500 mb-3">
                                 {candidate.party && `(${candidate.party})`}
                             </p>
-                            <div className="flex items-center mt-3">
-                                <p className="ml-1 font-bold text-2xl">
-                                    {candidate.votes || 0}
-                                </p>
-                            </div>
+                            <p className="text-xl md:text-2xl font-bold">
+                                {candidate.votes || 0}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -138,18 +149,26 @@ export function ResultContent() {
     }
 
     return (
-        <div className="space-y-6 max-w-7xl mx-auto">
-            <div>
-                <h1 className="text-2xl font-bold tracking-tight">
-                    iBoto Senator Results
-                </h1>
-                <p className="text-muted-foreground">
-                    Results updated every 3 minutes...
-                </p>
+        <div className="space-y-16 max-w-7xl mx-auto">
+            <div className="flex flex-col justify-center items-center gap-5 py-10">
+                <div className="text-center space-y-1 px-4">
+                    <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
+                        iBoto Senator Mock Election 2025
+                    </h1>
+                    <p className="text-sm md:text-base lg:text-lg text-muted-foreground">
+                        Shape the future of the Philippines. Sign in, cast your
+                        vote, and receive your personalized Senate ballot today.
+                    </p>
+                </div>
+                {!alreadyVoted && (
+                    <Button asChild variant="default" size="lg">
+                        <Link href="/dashboard/vote">Vote Now</Link>
+                    </Button>
+                )}
             </div>
             <Card className="bg-transparent border-none shadow-none p-0 overflow-hidden">
                 <CardHeader className="p-0">
-                    <CardTitle className="text-4xl font-bold flex items-center gap-2">
+                    <CardTitle className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight font-bold flex items-center gap-2">
                         <span>Magic 12 🏆</span>
                     </CardTitle>
                 </CardHeader>
@@ -176,7 +195,7 @@ export function ResultContent() {
             </Card>
             <Card className="bg-transparent border-none shadow-none p-0 overflow-hidden">
                 <CardHeader className="p-0">
-                    <CardTitle className="text-4xl font-bold flex items-center gap-2">
+                    <CardTitle className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight font-bold flex items-center gap-2">
                         <span>All Candidates 🔥</span>
                     </CardTitle>
                 </CardHeader>
