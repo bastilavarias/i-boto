@@ -97,7 +97,7 @@ export function ResultContent() {
         return (
             <motion.div key={candidate.code || index} variants={itemVariants}>
                 <div className="p-4 transition-shadow relative">
-                    <div className="flex items-start gap-4">
+                    <div className="flex items-start gap-1">
                         <div
                             className={cn(
                                 'flex items-center justify-center w-8 h-8 rounded-full font-bold text-xl flex-shrink-0',

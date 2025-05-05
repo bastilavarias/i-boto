@@ -41,9 +41,9 @@ export function useAuth(): UseAuthReturn {
     }, [])
 
     useEffect(() => {
-        if (user) {
-            setToken()
-        }
+        if (!user) return
+
+        return () => setToken()
     }, [user])
 
     const login = async () => {
@@ -63,27 +63,29 @@ export function useAuth(): UseAuthReturn {
     }
 
     const setToken = async () => {
+        if (!user) return
         try {
+            const idToken = await user.getIdToken(true)
+
             const result = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/api/auth/set-token`,
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                    //@ts-expect-error
-                    body: JSON.stringify({ token: user?.accessToken }),
+                    body: JSON.stringify({ token: idToken }),
                     credentials: 'include',
                 }
             )
+
             if (!result.ok) {
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                //@ts-expect-error
-                throw new Error(result.message)
+                const errorData = await result.json()
+                throw new Error(errorData.message || 'Failed to set token')
             }
+
             setIsAuthenticated(true)
         } catch (e) {
-            console.error(e)
-            toast.warning('Session Expired')
+            console.error('Token error:', e)
+            toast.warning('Session expired. Please sign in again.')
             await logout()
         }
     }

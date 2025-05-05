@@ -9,14 +9,21 @@ export default class AuthController {
       const decodedToken = await firebaseAuth.verifyIdToken(idToken)
       const uid = decodedToken.uid
       const isProd = env.get('NODE_ENV') === 'production'
-      response.cookie('session', idToken, {
+      const domain = isProd ? env.get('COOKIE_DOMAIN') : undefined
+      const cookieOptions = {
         httpOnly: true,
-        secure: isProd,
+        secure: false,
         sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 5, // 5 days
+        maxAge: 60 * 60,
         path: '/',
-        ...(isProd && env.get('COOKIE_DOMAIN') ? { domain: env.get('COOKIE_DOMAIN') } : {}),
-      })
+      }
+      console.log(isProd)
+      if (isProd) {
+        cookieOptions.secure = true
+        cookieOptions.domain = domain
+      }
+      console.log(cookieOptions)
+      response.cookie('session', idToken, cookieOptions)
 
       return response.json({
         message: 'Logged in',

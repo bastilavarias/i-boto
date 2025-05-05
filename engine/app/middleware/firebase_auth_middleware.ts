@@ -4,18 +4,27 @@ import { firebaseAuth } from '#start/firebase'
 
 export default class FirebaseAuthMiddleware {
   async handle(ctx: HttpContext, next: NextFn) {
-    const token = ctx.request.cookie('session')
+    const cookie = ctx.request.cookie('session')
 
-    if (!token) {
+    if (!cookie) {
       return ctx.response.unauthorized({ message: 'No session token found' })
     }
 
     try {
-      const user = await firebaseAuth.verifyIdToken(token)
-      //@ts-ignore
-      ctx.request.user = user.firebase.identities.email[0]
+      const firebaseUser = await firebaseAuth.verifyIdToken(cookie)
+      ctx.request.user = firebaseUser.email
+
       await next()
     } catch (error) {
+      console.error('Firebase token verification error:', error.message)
+
+      // Match Firebase error
+      if (error.code === 'auth/id-token-expired') {
+        return ctx.response.unauthorized({
+          message: 'Session expired. Please refresh and try again.',
+        })
+      }
+
       return ctx.response.unauthorized({ message: 'Invalid or expired token' })
     }
   }

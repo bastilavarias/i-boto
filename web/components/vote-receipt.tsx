@@ -8,6 +8,7 @@ import { candidates } from '@/data'
 import { Candidate } from '@/type'
 import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
+import { Avatar } from '@/components/ui/avatar'
 
 interface VoteReceiptProps {
     dataFrom: 'url' | 'storage'
@@ -24,7 +25,7 @@ export function VoteReceipt({ dataFrom }: VoteReceiptProps) {
             main: 'iBoto',
             subtitle: 'Decentralized Mock Election Website',
         },
-        heading: 'My Personal Ballot',
+        heading: 'Personalized Senator Ballot',
         footer: {
             hashtag: '#HALALAN2025',
             website: 'www.iboto.vercel.app',
@@ -115,24 +116,31 @@ export function VoteReceipt({ dataFrom }: VoteReceiptProps) {
     const CandidateItem = ({ candidate }: { candidate: Candidate | null }) => {
         return (
             <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center space-x-4 w-full">
-                    <div className="flex items-center justify-start pl-40 pr-2 py-4 bg-white w-full relative py-2 rounded-l-4xl rounded-br-4xl">
-                        <h3
-                            className="font-bold text-5xl text-yellow pr-3"
-                            style={{
-                                color: COLORS.yellow,
-                            }}
-                        >
-                            {candidate?.placement}
-                        </h3>
+                <div className="flex items-start space-x-3 w-full">
+                    <Avatar
+                        className="rounded-full flex justify-center items-center text-7xl w-24 h-24 font-bold -mt-10 -mr-2.5 text-right"
+                        style={{
+                            color: COLORS.yellow,
+                        }}
+                    >
+                        {candidate ? (
+                            <span>
+                                {candidate.placement < 10 && '0'}
+                                {candidate.placement}
+                            </span>
+                        ) : (
+                            '00'
+                        )}
+                    </Avatar>
+                    <div className="flex items-center justify-between pl-40 pr-2 py-4 bg-white w-full relative py-2 rounded-l-4xl rounded-br-4xl relative">
                         <div className="overflow-hidden flex flex-col items-start justify-center truncate">
                             <p
-                                className="text-4xl font-bold leading-none"
+                                className="text-3xl font-bold leading-none"
                                 style={{
                                     color: COLORS.blue,
                                 }}
                             >
-                                {truncate(candidate?.name || 'Vacant', 11)}
+                                {truncate(candidate?.name || 'Vacant', 12)}
                             </p>
                             <p
                                 className="font-medium text-xl"
@@ -172,7 +180,7 @@ export function VoteReceipt({ dataFrom }: VoteReceiptProps) {
     return (
         <div
             id="receipt-template"
-            className={`min-w-[1080px] p-10 space-y-32 font-['Poppins'] w-full box-border`}
+            className={`min-w-[1080px] p-10 space-y-20 font-['Poppins'] w-full box-border`}
             style={{
                 background: `url('/images/philippines-map.png'), linear-gradient(to bottom, ${COLORS.blue}, ${COLORS.red})`,
                 backgroundRepeat: 'no-repeat',
