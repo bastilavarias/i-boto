@@ -45,9 +45,9 @@ export function LoginContent() {
                     Back to Home
                 </Link>
             </div>
-            <Card className="shadow-lg border-gray-200">
+            <Card className="border-0 shadow-none bg-transparent">
                 <CardHeader className="space-y-1">
-                    <CardTitle className="text-2xl text-center">
+                    <CardTitle className="text-3xl text-center">
                         Sign In
                     </CardTitle>
                     <CardDescription className="text-center">
@@ -57,8 +57,9 @@ export function LoginContent() {
                 <CardContent className="flex flex-col gap-4">
                     <Alert className="bg-blue-50 border-blue-200">
                         <AlertDescription className="text-blue-700">
-                            Your email will not be stored in any database and is
-                            only kept locally in your browser.
+                            For the best experience, please use a desktop to
+                            vote. Your email won’t be saved in any database—it
+                            stays only in your browser.
                         </AlertDescription>
                     </Alert>
 

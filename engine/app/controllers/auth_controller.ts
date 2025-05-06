@@ -8,7 +8,6 @@ interface CustomCookieOptions {
   sameSite: string | false
   maxAge: number
   path: string
-  domain?: string | undefined
 }
 
 export default class AuthController {
@@ -18,7 +17,6 @@ export default class AuthController {
       const decodedToken = await firebaseAuth.verifyIdToken(idToken)
       const uid = decodedToken.uid
       const isProd = env.get('NODE_ENV') === 'production'
-      const domain = isProd ? env.get('COOKIE_DOMAIN') : undefined
       const cookieOptions: CustomCookieOptions = {
         httpOnly: true,
         secure: isProd,
@@ -28,7 +26,6 @@ export default class AuthController {
       }
       if (isProd) {
         cookieOptions.secure = true
-        cookieOptions.domain = domain
       }
       // @ts-ignore
       response.cookie('session', idToken, cookieOptions)
