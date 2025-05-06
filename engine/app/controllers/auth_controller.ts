@@ -5,7 +5,7 @@ import env from '#start/env'
 interface CustomCookieOptions {
   httpOnly: boolean
   secure: boolean
-  sameSite: 'lax'
+  sameSite: string | false
   maxAge: number
   path: string
   domain?: string | undefined
@@ -21,8 +21,8 @@ export default class AuthController {
       const domain = isProd ? env.get('COOKIE_DOMAIN') : undefined
       const cookieOptions: CustomCookieOptions = {
         httpOnly: true,
-        secure: false,
-        sameSite: 'lax',
+        secure: isProd,
+        sameSite: isProd ? 'none' : false,
         maxAge: 60 * 60,
         path: '/',
       }
@@ -30,6 +30,7 @@ export default class AuthController {
         cookieOptions.secure = true
         cookieOptions.domain = domain
       }
+      // @ts-ignore
       response.cookie('session', idToken, cookieOptions)
 
       return response.json({
