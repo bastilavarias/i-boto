@@ -220,12 +220,12 @@ export function Ballot() {
                     variants={containerVariants}
                     initial="hidden"
                     animate="visible"
-                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+                    className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4"
                 >
                     {filteredCandidates.map((candidate) => (
                         <div
                             key={candidate.code}
-                            className={`flex items-center gap-3 p-3 h-32 border rounded-md cursor-pointer ${
+                            className={`flex items-center gap-3 p-3 h-32 border rounded-md cursor-pointer transform hover:scale-105 hover:shadow-2xl transition duration-300 ease-in-out ${
                                 selectedCandidates.includes(candidate.code)
                                     ? 'bg-green-50 border-green-300'
                                     : 'bg-white'
@@ -241,25 +241,32 @@ export function Ballot() {
                                     onSelectCandidate(candidate.code)
                                 }
                             />
-                            <div className="flex items-center gap-3 flex-1">
-                                <div>
-                                    <label
-                                        htmlFor={`candidate-checkbox-${candidate.placement}`}
-                                        className="font-medium cursor-pointer"
-                                    >
-                                        {candidate.placement}. {candidate.name}
-                                    </label>
-                                    <p className="text-sm text-muted-foreground">
-                                        ({candidate.party})
-                                    </p>
+                            <div className="flex items-center gap-2 flex-1">
+                                <div className="flex items-center gap-2 flex-1">
+                                    <CandidateAvatar
+                                        candidate={candidate}
+                                        options={{
+                                            className: 'w-24 h-24',
+                                        }}
+                                    />
+                                    <div className="w-full flex justify-between items-center">
+                                        <div>
+                                            <label
+                                                htmlFor={`candidate-checkbox-${candidate.placement}`}
+                                                className="font-bold text-xl"
+                                            >
+                                                {candidate.name}
+                                            </label>
+                                            <p className="text-md text-muted-foreground italic font-medium">
+                                                {candidate.party}
+                                            </p>
+                                        </div>
+                                        <div className="text-4xl font-bold">
+                                            {candidate.placement}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <CandidateAvatar
-                                candidate={candidate}
-                                options={{
-                                    className: 'w-24 h-24',
-                                }}
-                            />
                         </div>
                     ))}
                 </motion.div>
