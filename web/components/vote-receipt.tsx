@@ -117,21 +117,20 @@ export function VoteReceipt({ dataFrom }: VoteReceiptProps) {
         return (
             <div className="flex items-center justify-between gap-4">
                 <div className="flex items-start space-x-3 w-full">
-                    <Avatar
-                        className="rounded-full flex justify-center items-center text-7xl w-24 h-24 font-bold -mt-10 -mr-2.5 text-right"
-                        style={{
-                            color: COLORS.yellow,
-                        }}
-                    >
-                        {candidate ? (
+                    {candidate && (
+                        <Avatar
+                            className="rounded-full flex justify-center items-center text-7xl w-24 h-24 font-bold -mt-10 -mr-2.5 text-right"
+                            style={{
+                                color: COLORS.yellow,
+                            }}
+                        >
                             <span>
                                 {candidate.placement < 10 && '0'}
                                 {candidate.placement}
                             </span>
-                        ) : (
-                            '00'
-                        )}
-                    </Avatar>
+                        </Avatar>
+                    )}
+
                     <div className="flex items-center justify-between pl-40 pr-2 py-4 bg-white w-full relative py-2 rounded-l-4xl rounded-br-4xl relative">
                         <div className="overflow-hidden flex flex-col items-start justify-center truncate">
                             <p
