@@ -54,7 +54,7 @@ export default class VoteController {
     } catch (error) {
       console.error(error.message)
       return response.unauthorized({
-        message: error.message,
+        message: 'Something went wrong. Please try again.',
       })
     }
   }

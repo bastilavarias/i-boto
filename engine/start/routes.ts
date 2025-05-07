@@ -19,6 +19,7 @@ router
     router
       .group(() => {
         router.post('/set-token', [AuthController, 'setToken'])
+        router.get('/logout', [AuthController, 'logout'])
       })
       .prefix('/auth')
 

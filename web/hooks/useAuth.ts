@@ -40,10 +40,11 @@ export function useAuth(): UseAuthReturn {
         return () => unsubscribe()
     }, [])
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     useEffect(() => {
-        if (!user) return
-
-        return () => setToken()
+        if (!user && !isAuthenticated) return
+        setToken()
     }, [user])
 
     const login = async () => {
@@ -56,10 +57,11 @@ export function useAuth(): UseAuthReturn {
     }
 
     const logout = async () => {
-        router.push('/login')
-        await signOut(auth)
+        router.push('/')
         setIsAuthenticated(false)
         setUser(null)
+        await signOut(auth)
+        await clearCookie()
     }
 
     const setToken = async () => {
@@ -87,6 +89,16 @@ export function useAuth(): UseAuthReturn {
             console.error('Token error:', e)
             toast.warning('Session expired. Please sign in again.')
             await logout()
+        }
+    }
+    const clearCookie = async () => {
+        if (!user) return
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`, {
+            credentials: 'include',
+        })
+        try {
+        } catch (e) {
+            console.error('Clear cookie error:', e)
         }
     }
 

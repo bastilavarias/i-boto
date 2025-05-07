@@ -20,8 +20,8 @@ export default class ReceiptController {
         },
       })
     } catch (error) {
-      console.log(error.message)
-      return response.status(500).send({ error: error.message })
+      console.error(error.message)
+      return response.status(401).send({ error: 'Something went wrong. Please try again.' })
     }
   }
 }
