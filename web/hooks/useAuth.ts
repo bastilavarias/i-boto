@@ -10,6 +10,7 @@ import {
 } from 'firebase/auth'
 import { auth } from '../lib/firebase'
 import { useRouter } from 'next/navigation'
+import { httpClient } from '@/lib/http-client'
 import { toast } from 'sonner'
 
 const provider = new GoogleAuthProvider()
@@ -68,22 +69,7 @@ export function useAuth(): UseAuthReturn {
         if (!user) return
         try {
             const idToken = await user.getIdToken(true)
-
-            const result = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/api/auth/set-token`,
-                {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token: idToken }),
-                    credentials: 'include',
-                }
-            )
-
-            if (!result.ok) {
-                const errorData = await result.json()
-                throw new Error(errorData.message || 'Failed to set token')
-            }
-
+            await httpClient.post('/api/auth/set-token', { token: idToken })
             setIsAuthenticated(true)
         } catch (e) {
             console.error('Token error:', e)

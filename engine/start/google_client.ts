@@ -23,32 +23,27 @@ if (existsSync(TOKEN_PATH)) {
   oAuth2Client.setCredentials(token)
 }
 
-// @ts-ignore
-if (!oAuth2Client.credentials.access_token || oAuth2Client.isTokenExpiring?.()) {
-  if (oAuth2Client.credentials.refresh_token) {
-    const newToken = await oAuth2Client.refreshAccessToken()
-    oAuth2Client.setCredentials(newToken.credentials)
-    writeFileSync(TOKEN_PATH, JSON.stringify(newToken.credentials))
-  } else {
-    const authUrl = oAuth2Client.generateAuthUrl({
-      access_type: 'offline',
-      scope: ['https://www.googleapis.com/auth/youtube.upload'],
+if (oAuth2Client.credentials.refresh_token) {
+  const newToken = await oAuth2Client.refreshAccessToken()
+  oAuth2Client.setCredentials(newToken.credentials)
+  writeFileSync(TOKEN_PATH, JSON.stringify(newToken.credentials))
+} else {
+  const authUrl = oAuth2Client.generateAuthUrl({
+    access_type: 'offline',
+    scope: ['https://www.googleapis.com/auth/youtube.upload'],
+  })
+  console.log('Authorize this app by visiting this url:', authUrl)
+  const rl = createInterface({ input: process.stdin, output: process.stdout })
+  const code: string = await new Promise((resolve) =>
+    rl.question('Enter the code from that page here: ', (ans) => {
+      rl.close()
+      resolve(ans)
     })
+  )
 
-    console.log('Authorize this app by visiting this url:', authUrl)
-
-    const rl = createInterface({ input: process.stdin, output: process.stdout })
-    const code: string = await new Promise((resolve) =>
-      rl.question('Enter the code from that page here: ', (ans) => {
-        rl.close()
-        resolve(ans)
-      })
-    )
-
-    const { tokens } = await oAuth2Client.getToken(code)
-    oAuth2Client.setCredentials(tokens)
-    writeFileSync(TOKEN_PATH, JSON.stringify(tokens))
-  }
+  const { tokens } = await oAuth2Client.getToken(code)
+  oAuth2Client.setCredentials(tokens)
+  writeFileSync(TOKEN_PATH, JSON.stringify(tokens))
 }
 
 export default oAuth2Client
