@@ -9,7 +9,7 @@ const __filename = fileURLToPath(import.meta.url)
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const __dirname = path.dirname(__filename)
 
-let oAuth2Client = null
+let oAuth2Client: any = null
 
 try {
   const CREDENTIALS_PATH = path.resolve(__dirname, '../ytvu-client-secret.json')
