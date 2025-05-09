@@ -14,18 +14,22 @@ let oAuth2Client: any = null
 try {
   const CREDENTIALS_PATH = path.resolve(__dirname, '../ytvu-client-secret.json')
   const TOKEN_PATH = path.resolve(__dirname, '../ytvu-refresh-token.json')
-
   const credentials = JSON.parse(readFileSync(CREDENTIALS_PATH, 'utf-8'))
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { client_id, client_secret, redirect_uris } = credentials.web
-
   oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0])
-
   if (existsSync(TOKEN_PATH)) {
     const token = JSON.parse(readFileSync(TOKEN_PATH, 'utf-8'))
     oAuth2Client.setCredentials(token)
+    if (token.refresh_token) {
+      const newToken = await oAuth2Client.refreshAccessToken()
+      oAuth2Client.setCredentials(newToken.credentials)
+      if (!newToken.credentials.refresh_token && token.refresh_token) {
+        newToken.credentials.refresh_token = token.refresh_token
+      }
+      writeFileSync(TOKEN_PATH, JSON.stringify(newToken.credentials))
+    }
   }
-
   if (oAuth2Client.credentials.refresh_token) {
     const newToken = await oAuth2Client.refreshAccessToken()
     oAuth2Client.setCredentials(newToken.credentials)
@@ -33,6 +37,7 @@ try {
   } else {
     const authUrl = oAuth2Client.generateAuthUrl({
       access_type: 'offline',
+      prompt: 'consent',
       scope: ['https://www.googleapis.com/auth/youtube.upload'],
     })
     console.log('Authorize this app by visiting this url:', authUrl)
@@ -43,7 +48,6 @@ try {
         resolve(ans)
       })
     )
-
     const { tokens } = await oAuth2Client.getToken(code)
     oAuth2Client.setCredentials(tokens)
     writeFileSync(TOKEN_PATH, JSON.stringify(tokens))
