@@ -16,7 +16,6 @@ export default class ThumbnailController {
     try {
       await this.generate()
       await this.upload()
-      process.exit(1)
     } catch (error) {
       console.error('Generate upload error:', error)
     }
