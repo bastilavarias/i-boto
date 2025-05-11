@@ -25,9 +25,9 @@ export default function AboutPage() {
                 </div>
                 <div className="aspect-video h-[50vh] md:h-full w-full overflow-hidden rounded-lg space-y-5">
                     <iframe
-                        src="https://www.youtube.com/embed/19g66ezsKAg"
+                        src="https://www.youtube.com/embed/6GqIEDsCnJM"
                         className="w-full h-full"
-                        title="My Dev Journey"
+                        title="iBoto Explanation Video"
                         allowFullScreen
                     />
                 </div>
